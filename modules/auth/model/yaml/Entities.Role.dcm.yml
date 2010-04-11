@@ -1,0 +1,19 @@
+Entities\Role:
+  type: entity
+  table: roles
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    name:
+      type: string
+      length: 32
+    description:
+      type: string
+      length: 100    
+  manyToMany:
+    users:
+      targetEntity: Entities\User
+      mappedBy: user

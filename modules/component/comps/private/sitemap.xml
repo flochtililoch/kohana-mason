@@ -1,0 +1,13 @@
+<comp>
+	<attr>
+		<key name="layout">'none'</key>
+	</attr>
+	<php>
+		<![CDATA[
+		$map = 'there';
+		]]>
+	</php>
+    <process>
+		<key name="map">$map</key>
+	</process>
+</comp>

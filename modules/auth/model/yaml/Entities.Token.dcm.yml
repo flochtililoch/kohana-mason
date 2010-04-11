@@ -1,0 +1,20 @@
+Entities\Token:
+  type: entity
+  table: tokens
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    expires:
+      type: integer
+    hash:
+      type: string
+      length: 32
+    user_agent:
+      type: string
+      length: 40
+  manyToOne:
+    user:
+      targetEntity: Entities\User
