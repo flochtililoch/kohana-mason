@@ -1,0 +1,18 @@
+Entities\Email:
+  type: entity
+  table: emails
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    type:
+      type: string
+      length: 32
+    email:
+      type: string
+      length: 100
+  manyToOne:
+    user:
+      targetEntity: Entities\User

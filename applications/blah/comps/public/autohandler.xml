@@ -1,0 +1,52 @@
+<comp>
+	<attr>
+		<key name="my_attr">'inherited from autohandler'</key>
+		<key name="logged_in">NULL</key>
+	</attr>
+	<php>
+		<![CDATA[
+
+		// Form posted ?
+		if(isset($_POST['action']) && $_POST['action'] === 'login')
+		{
+			$remember_me = isset($_POST['remember_me']) ? (bool) $_POST['remember_me'] : FALSE;
+
+			// Log user in
+			$this->logged_in = Auth::instance()->login($_POST['username'], $_POST['password'], $remember_me);
+			
+			// Defines login_failed flag only if login has actually failed (don't set it at all otherwise)
+			if($this->logged_in === FALSE)
+			{
+				$this->login_failed = TRUE;
+			}
+		}
+		// Logging out ?
+		else if(in_array('logout', $this->request->param()))
+		{
+			Auth::instance()->logout();
+			
+			// Redirection done on the current address, w/o logout param in URL
+			$this->request->redirect($this->request->route->uri());
+		}
+		else
+		{
+			// Set logged in flag
+			$this->logged_in = Auth::instance()->logged_in();
+		}
+		
+		// Try auto login if not already logged in
+		if($this->logged_in === FALSE)
+		{
+			$this->logged_in = Auth::instance()->auto_login();
+		}
+		
+		// If user is logged in
+		if($this->logged_in === TRUE)
+		{
+			$this->user = Auth::instance()->get_user();
+		}
+
+		]]>
+	</php>
+	<process/>
+</comp>

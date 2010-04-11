@@ -1,0 +1,14 @@
+<comp>
+	<attr>
+		<key name="my_attr">'inherited from foo/bar/autohandler'</key>
+	</attr>
+	<php>
+		<![CDATA[
+		$title = 'Welcome here, its '.date('H:i:s', time());
+		]]>
+	</php>
+	<process>
+		<key name="title">$title</key>
+		<key name="attr">$this->my_attr</key>
+	</process>
+</comp>

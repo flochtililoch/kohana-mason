@@ -1,0 +1,15 @@
+<comp>
+	<attr>
+		<key name="my_attr">'moop'</key>
+	</attr>
+	<php>
+		<![CDATA[
+		$class = get_class();
+		$content = $this->my_attr;
+		]]>
+	</php>
+	<process>
+		<key name="class">$class</key>
+		<key name="content">$content</key>
+	</process>
+</comp>

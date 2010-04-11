@@ -1,0 +1,21 @@
+<p>
+	<div i18n:translate="">Welcome <span i18n:name="user" tal:replace="request_comp/user/getFirstname"/></div>
+	<a tal:attributes="href base_uri:logout" tal:condition="request_comp/logged_in" i18n:translate="">Sign off</a>
+</p>
+<div tal:condition="not: request_comp/logged_in" tal:omit-tag="">
+	<p tal:condition="request_comp/login_failed | FALSE" i18n:translate="">Login / password incorrect</p>
+	<form name="login" method="post" tal:attributes="action uri;">
+		<fieldset>
+			<legend i18n:translate="">Login</legend>
+			<label for="username" i18n:translate="">Username :</label>
+			<input id="username" name="username" type="text"/>
+			<label for="password" i18n:translate="">Password :</label>
+			<input id="password" name="password" type="password"/>
+			<label for="remember_me" i18n:translate="">Remember me</label>
+			<input id="remember_me" name="remember_me" type="checkbox"/>
+			<input name="action" type="hidden" value="login"/>
+			<input type="submit" name="signin" value="signin"/>
+		</fieldset>
+	</form>
+	<p>Not yet a member? <a href="/register" i18n:translate="" tal:attributes="href uri:/register">Register</a></p>
+</div>

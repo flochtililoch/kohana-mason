@@ -1,0 +1,7 @@
+<div style="background:pink; padding:10px; font-size:10px;">
+    <div tal:omit-tag="" tal:repeat="comps tree">
+        <div tal:omit-tag="" tal:repeat="comp comps">
+            <a tal:attributes="href repeat/comps/key" tal:content="comp"/>
+        </div>
+    </div>
+</div>
