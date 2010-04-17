@@ -4,6 +4,7 @@ return array
 (
 	APPPATH,												// Application
 	CACHEPATH,												// Generated code
+	realpath(VENDORPATH.'symfony').DIRECTORY_SEPARATOR,		// Symfony components
 	realpath(MODPATH.'doctrine').DIRECTORY_SEPARATOR,		// Doctrine module
 	realpath(VENDORPATH.'doctrine').DIRECTORY_SEPARATOR,	// Doctrine ORM Library
 	realpath(MODPATH.'phptal').DIRECTORY_SEPARATOR,			// PHPTAL module
