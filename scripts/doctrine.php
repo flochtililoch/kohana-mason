@@ -5,48 +5,34 @@ require __DIR__.'/init.php';
 
 // Initiate Entity manager
 $orm = Orm::factory();
-$configuration = new \Doctrine\Common\Cli\Configuration();
-$configuration->setAttribute('em', $orm);
 
-// If create or update mode, add to arguments all paths where entities have been found
-if(in_array('--create', $_SERVER['argv']) || in_array('--update', $_SERVER['argv']) || in_array('--complete-update', $_SERVER['argv']))
-{
-	$_SERVER['argv'][] = '--class-dir='.implode(',', Kohana::list_paths('classes/entities'));
-}
+$helperSet = new \Symfony\Components\Console\Helper\HelperSet(array(
+    'db' => new \Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper($orm->getConnection()),
+    'em' => new \Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper($orm)
+));
 
-// If convert mapping mode
-elseif(in_array('orm:generate-entities', $_SERVER['argv']))
-{
-	// Run CLI Controller
-	$cli = new \Doctrine\Common\CLI\CLIController($configuration);
-	
-	// Create cache dir if not present
-	if(!is_dir(CACHEPATH.'classes'))
-	{
-		// Create directory
-		mkdir(CACHEPATH.'classes', 0777, TRUE);
+$cli = new \Symfony\Components\Console\Application('Doctrine Command Line Interface', Doctrine\Common\Version::VERSION);
+$cli->setCatchExceptions(true);
+$cli->setHelperSet($helperSet);
+$cli->addCommands(array(
+    // DBAL Commands
+    new \Doctrine\DBAL\Tools\Console\Command\RunSqlCommand(),
+    new \Doctrine\DBAL\Tools\Console\Command\ImportCommand(),
 
-		// Set permissions (must be manually set to fix umask issues)
-		chmod(CACHEPATH.'classes', 0777);
-	}
+    // ORM Commands
+    new \Doctrine\ORM\Tools\Console\Command\ClearCache\MetadataCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\ClearCache\ResultCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\ClearCache\QueryCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\SchemaTool\CreateCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\SchemaTool\UpdateCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\SchemaTool\DropCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\EnsureProductionSettingsCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\ConvertDoctrine1SchemaCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\GenerateRepositoriesCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\GenerateEntitiesCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\GenerateProxiesCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\ConvertMappingCommand(),
+    new \Doctrine\ORM\Tools\Console\Command\RunDqlCommand(),
 
-	// Each path containing mapping informations
-	foreach(Kohana::list_paths('model/yaml') as $path)
-	{
-		// Use passed arguments
-		$argv = $_SERVER['argv'];
-		$argv[] = '--from='.$path;
-		$argv[] = '--dest='.CACHEPATH.'classes';
-		
-		// Run CLI
-		$cli->run($argv);
-	}
-	
-	// And stop here
-	exit(0);
-}
-
-// Run CLI Controller
-use \Doctrine\Common\Cli\CliController;
-$cli = new \Doctrine\Common\Cli\CliController($configuration);
-$cli->run($_SERVER['argv']);
+));
+$cli->run();
