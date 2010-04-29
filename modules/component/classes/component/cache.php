@@ -4,7 +4,9 @@
  * Kohana Cache
  * 
  * Caching library for Kohana PHP 3
- * Modified to get config items from Kohana static members instead of a config file
+ * Modified to get config items from Kohana static members instead of a config file,
+ * so then it can be used by Kohana core itself (especially for find_file() method,
+ * which Kohana::config() make a heavy use)
  *
  * @package    	Component
  * @category   	Cache
