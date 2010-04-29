@@ -3,7 +3,7 @@
 return array
 (
 	'timezone'		=> 'Europe/Paris',			// Server Timezone
-	'caching'		=> FALSE,					// Enable or disable internal caching
+	'caching'		=> TRUE,					// Enable or disable internal caching
 	'profile'		=> TRUE,					// Enable or disable internal profiling
 	'logging'		=> FALSE,					// Enable or disable internal logging	
 	'errors'		=> TRUE
