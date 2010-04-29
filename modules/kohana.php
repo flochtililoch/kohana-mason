@@ -45,24 +45,6 @@ class Kohana extends Kohana_Core
 	public static $caching = TRUE;
 	
 	/**
-	 * Core cache driver (module Cache)
-	 * Default : Kohana internal file caching
-	 *
-	 * @access	public
-	 * @static
-	 */
-	public static $cache_driver = 'Apc';
-	
-	/**
-	 * Core cache expire time (module Cache)
-	 * Default : never expire
-	 *
-	 * @access	public
-	 * @static
-	 */
-	public static $cache_expire = 0;
-	
-	/**
 	 * Include paths that are used to find files
 	 * before init paths modification
 	 *
@@ -168,18 +150,6 @@ class Kohana extends Kohana_Core
 		
 		// Set the cache directory path
 		Kohana::$cache_dir = realpath(CACHEPATH.'kohana');
-		
-		// Define which cache driver to use
-        if(isset($settings['cache_drv']))
-		{
-			Kohana::$cache_driver = $settings['cache_drv'];
-		}
-		
-		// Define cache expire time
-		if(isset($settings['cache_exp']))
-		{
-			Kohana::$cache_expire = $settings['cache_exp'];
-		}
 		
 		// Set the new include paths
 		Kohana::$_paths = (array) Kohana::config('paths');
@@ -332,12 +302,6 @@ class Kohana extends Kohana_Core
 		{
 	        require $path;
 			
-			// Class loaded in memory, delete file right after if cache disabled
-			if(Kohana::$caching === FALSE)
-			{
-				unlink($path);
-			}
-			
 			// Class has been found
 			return TRUE;
 		}
@@ -346,41 +310,6 @@ class Kohana extends Kohana_Core
 		return FALSE;
 	}
 
-	/**
-	 * Load / Write the cache
-     *
-	 * @param   string   name of the cache
-	 * @param   mixed    data to cache
-	 * @param   integer  number of seconds the cache is valid for
-	 * @return  mixed    for getting
-	 * @return  boolean  for setting
-	 * @access	public
-	 * @static
-	 */
-	public static function cache($name, $data = NULL, $lifetime = 0)
-	{
-		if ($data === NULL)
-		{
-			// if cache to retrieve is find_file results, load it directly from apc
-			// (to avoid classes paths not being included in cache)
-			if($name === 'Kohana::find_file()')
-			{
-				if(Kohana::$cache_driver === 'Apc')
-				{
-					return apc_fetch($name);
-				}
-				else
-				{
-					return Kohana_Core::cache($name);
-				}
-			}
-			return Cache::instance()->get($name);
-		}
-
-		// Write the cache
-		return Cache::instance()->set($name, $data, $lifetime);
-	}
-	
 	/**
 	 * List all paths where $dir has been found
 	 *
@@ -445,12 +374,13 @@ class Kohana extends Kohana_Core
 			}
 			else
 			{
-				$cmd = 'rd %s /s /q';
+				$cmd = 'rd "%s" /s /q';
 			}
 			system(sprintf($cmd, CACHEPATH.'classes/controller'));
 			system(sprintf($cmd, CACHEPATH.'i18n'));
 			system(sprintf($cmd, CACHEPATH.'kohana'));
 			system(sprintf($cmd, CACHEPATH.'views'));
+			
 			Cache::instance()->delete_all();
 		}
 		
