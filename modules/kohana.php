@@ -297,6 +297,9 @@ class Kohana extends Kohana_Core
 				echo View::factory('profiler/stats');
 			}
         }
+		
+		// Save persistent entities
+		Orm::save();
 	}
 
 	/**
@@ -427,9 +430,6 @@ class Kohana extends Kohana_Core
 	 */
 	public static function shutdown_handler()
 	{
-		// Save persistent entities
-		Orm::save();
-		
 		// If cache is disabled, remove cache entries
 		if(Kohana::$caching === FALSE)
 		{
