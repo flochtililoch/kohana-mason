@@ -10,6 +10,13 @@ class Component_Request extends Kohana_Request
 {
 
 	/**
+     * Request parent controller
+     *
+	 * @access	public
+	 */
+    public $parent = NULL;
+
+	/**
 	 * Creates a new request object for the given URI.
 	 *
 	 * @param   string  URI of the request

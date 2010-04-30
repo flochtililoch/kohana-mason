@@ -5,6 +5,9 @@
 	</attr>
 	<php>
 		<![CDATA[
+		
+		// All is good so far
+		$login_failed = FALSE;
 
 		// Form posted ?
 		if(isset($_POST['action']) && $_POST['action'] === 'login')
@@ -12,12 +15,12 @@
 			$remember_me = isset($_POST['remember_me']) ? (bool) $_POST['remember_me'] : FALSE;
 
 			// Log user in
-			$this->logged_in = Auth::instance()->login($_POST['username'], $_POST['password'], $remember_me);
+			$logged_in = Auth::instance()->login($_POST['username'], $_POST['password'], $remember_me);
 			
 			// Defines login_failed flag only if login has actually failed (don't set it at all otherwise)
-			if($this->logged_in === FALSE)
+			if($logged_in === FALSE)
 			{
-				$this->login_failed = TRUE;
+				$login_failed = TRUE;
 			}
 		}
 		// Logging out ?
@@ -31,22 +34,25 @@
 		else
 		{
 			// Set logged in flag
-			$this->logged_in = Auth::instance()->logged_in();
+			$logged_in = Auth::instance()->logged_in();
 		}
 		
 		// Try auto login if not already logged in
-		if($this->logged_in === FALSE)
+		if($logged_in === FALSE)
 		{
-			$this->logged_in = Auth::instance()->auto_login();
+			$logged_in = Auth::instance()->auto_login();
 		}
 		
 		// If user is logged in
-		if($this->logged_in === TRUE)
+		if($logged_in === TRUE)
 		{
 			$this->user = Auth::instance()->get_user();
 		}
 
 		]]>
 	</php>
-	<process/>
+	<process>
+		<key name="logged_in" context="global">$logged_in</key>
+		<key name="login_failed" context="global">$login_failed</key>
+	</process>
 </comp>

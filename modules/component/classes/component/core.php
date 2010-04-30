@@ -200,7 +200,9 @@ class Component_Core
 				// Each key being a view variable
 				foreach($keys->key as $value => $key)
 				{
-					$process[] = sprintf('self::$_process[\'%2$s\'] = %3$s;', $class, $key->attributes()->__toString(), $key[0]);
+					// Check if context key defined
+					$context = isset($key->attributes()->context) && $key->attributes()->context->__toString() === 'global' ? '$this->%2$s = %3$s;' : 'self::$_process[\'%2$s\'] = %3$s;';
+					$process[] = sprintf($context, $class, $key->attributes()->name->__toString(), $key[0]);
 				}
 			}
 		}

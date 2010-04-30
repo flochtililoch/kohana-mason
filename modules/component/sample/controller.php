@@ -11,36 +11,48 @@ class %2$s extends %3$s
 	
 	/**
 	 * Component origin in tree
+	 *
+	 * @access	protected
 	 */
 	protected static $_path = '%5$s';
 	
 	/**
 	 * Component path
+	 *
+	 * @access	protected
 	 */
 	protected static $_directory = '%6$s';
 	
 	/**
 	 * Component name
+	 *
+	 * @access	protected
 	 */
 	protected static $_name = '%7$s';
     
 	/**
 	 * View type
+	 *
+	 * @access	protected
 	 */
 	protected static $_view_engine = %8$s;
 	
 	/**
 	 * View variables container
 	 */
-	protected static $_process = NULL;
+	protected static $_process = array();
 	
 	/**
 	 * Controller instance container
+	 *
+	 * @access	protected
 	 */
 	protected static $_instance = NULL;
 	
 	/**
 	 * Wrapping chain container
+	 *
+	 * @access	protected
 	 */
 	protected static $_wrapping_chain = NULL;
 	
@@ -95,17 +107,7 @@ class %2$s extends %3$s
 			return self::$_process[$varname];
 		}
 		
-		// If variable doesnt exists in current controller context, look for it in its parent
-		try
-		{
-			$controller = self::$_instance->request->parent;
-		}
-		catch(Exception $e)
-		{
-			throw new Kohana_Request_Exception('Unable to find \':varname\' variable in context', array(':varname' => $varname));
-		}
-
-		return $controller::context($varname);
+		return NULL;
 
 	}
 	
