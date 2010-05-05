@@ -12,58 +12,9 @@ class Component_View extends Kohana_View
     /**
      * Engine identifier constants
      */
-    const ENGINE = 1;
+    const ENGINE = 'View';
 
     /**
-	 * Returns a new View object.
-	 *
-	 * @param   string  Controller class name
- 	 * @return  View
-	 * @access	public
-	 * @static
-	 */
-	public static function load($comp)
-	{
-		// Get information from controller
-		$path = $comp::get('_path');
-		$directory = $comp::get('_directory');
-		$controller = $comp::get('_name');
-		$engine = $comp::get('_view_engine');
-		
-		// Work with controller's views only
-		$views = Kohana::$tree['comps'][$path][$directory][$controller]['views'];
-
-		// Find locale / channel informations
-		$language = isset($views[I18n::language()]) ? I18n::language() : 'def';
-		$country = isset($views[$language][I18n::country()]) ? I18n::country() : 'def';
-		$channel = isset($views[$language][$country][I18n::channel()]) ? I18n::channel() : 'def';
-		
-		// Set template file path
-		$file = $path.'/'.$directory.'_'.$controller.'/'.$views[$language][$country][$channel]['name'];
-
-		// TAL view engine required ?
-		if($engine === Tal::ENGINE)
-	    {
-	        // Instanciate Tal class
-	        $view = new Tal($file, $comp);
-
-			// Set cache identifier
-			$view->setCacheId($views[$language][$country][$channel]['cache_id']);
-
-	        // Pass the translator object to the template manager
-            $view->setTranslator(I18n::instance());
-
-	        // Return view object
-    		return $view;
-	    }
-		// Default Kohana view engine required ?
-		elseif($engine === View::ENGINE || $engine === NULL)
-		{
-			return new View($file, $comp::get('_process'));
-		}
-	}
-	
-	/**
 	 * Sets the view filename.
 	 *
 	 * @throws  View_Exception
@@ -87,6 +38,37 @@ class Component_View extends Kohana_View
 		$this->_file = $path;
 
 		return $this;
+	}
+	
+	/**
+	 * Sets the initial view filename and local data. Views should almost
+	 * always only be created using [View::factory].
+	 *
+	 *     $view = new View($file);
+	 *
+	 * @param   string  view filename
+	 * @param   mixed	array of variables (used by default kohana core & modules) or static class name (used by component module)
+	 * @return  void
+	 * @uses    View::set_filename
+	 */
+	public function __construct($file = NULL, $data = NULL)
+	{
+		if ($file !== NULL)
+		{
+			$this->set_filename($file);
+		}
+
+		if ( $data !== NULL )
+		{
+			// Test if view is loaded from Component controller
+			if(is_string($data) && class_exists($data) && is_array($data::get('_process')))
+			{
+				$data = $data::get('_process');
+			}
+
+			// Add the values to the current data
+			$this->_data = $data + $this->_data;
+		}
 	}
 
 }	// End Component_View

@@ -11,14 +11,10 @@ class Tal_Core extends PHPTAL
 {
 
 	// View engine identifier
-	const ENGINE = 11;
+	const ENGINE = 'Tal';
 	
 	/**
 	 * Set cache identifier
-	 *
-	 * NOTICE : useless at the moment.
-	 * Would be useful for cache invalidation.
-	 * Waiting for PHPTAL PHP 5.3 Namespace implementation.
 	 *
 	 * @return	Tal
 	 * @access	public
@@ -30,13 +26,32 @@ class Tal_Core extends PHPTAL
 	}
 	
 	/**
+	 * Set controller name
+	 *
+	 * Used by context reader
+	 *
+	 * @return	Tal
+	 * @access	public
+	 */
+	public function setContext($controller)
+	{
+	   // Create new context object
+		$this->_context = new Context();
+		
+		// Store creator controller name
+		$this->_context->controller = $controller;
+		
+		return $this;
+	}
+	
+	/**
 	 * TAL Constructor.
 	 *
 	 * @param 	string 	Template file path
 	 * @param 	string 	Template data
 	 * @access	public
 	 */
-	public function __construct($file = FALSE, $controller = NULL)
+	public function __construct($file = FALSE, $comp = NULL, $cache_id = NULL)
 	{
 		// Find view file
 		$this->_path = Kohana::find_file('comps', $file, 'xhtml');
@@ -44,11 +59,8 @@ class Tal_Core extends PHPTAL
 		// Save source filename
 		$this->_compiled_file = str_replace(array('_', '.', '/'), array('', '_', '_'), $file).'_'.I18n::locale().'_'.I18n::channel();
 
-		// Create new context object
-		$this->_context = new Context();
-		
-		// Store creator controller name
-		$this->_context->controller = $controller;
+		// Set context controller class name
+		$this->setContext($comp);
 		
 		// If cache dir doesn't exists
 		if(!is_dir(CACHEPATH.'views'))
@@ -62,6 +74,12 @@ class Tal_Core extends PHPTAL
 		
 		// Compiled view go here
 		$this->setPhpCodeDestination(CACHEPATH.'views');
+		
+		// Set cache identifier
+		$this->setCacheId($cache_id);
+		
+		// Pass the translator object to the template manager
+		$this->setTranslator(I18n::instance());
 	}
 		
 	/**

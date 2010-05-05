@@ -7,7 +7,7 @@
 		$map = 'there';
 		]]>
 	</php>
-    <process>
+    <process engine="View::ENGINE">
 		<key name="map">$map</key>
 	</process>
 </comp>
