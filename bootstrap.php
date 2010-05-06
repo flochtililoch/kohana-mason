@@ -1,8 +1,29 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+// Define error reporting level
+error_reporting(E_ALL | E_STRICT);
+
+// Define the start time and memory usage of the application
+define('KOHANA_START_TIME', microtime(TRUE));
+define('KOHANA_START_MEMORY', memory_get_usage());
+
+// Define files extension
+define('EXT', '.php');
+
+// Define the absolute paths for configured directories
+define('DOCROOT', realpath(__DIR__).DIRECTORY_SEPARATOR);
+define('VENDORPATH', realpath(DOCROOT.'vendor').DIRECTORY_SEPARATOR);
+define('SYSPATH', realpath(VENDORPATH.'kohana').DIRECTORY_SEPARATOR);
+define('MODPATH', realpath(DOCROOT.'modules').DIRECTORY_SEPARATOR);
+define('VARPATH', realpath(DOCROOT.'var').DIRECTORY_SEPARATOR);
+define('APPSPATH', realpath(DOCROOT.'applications').DIRECTORY_SEPARATOR);
+
+// Load the base & Kohana core class
+require SYSPATH.'base'.EXT;
+require SYSPATH.'classes/kohana/core'.EXT;
 
 /**
  * Kohana's Core Class Extension
- * NOTICE : THIS FILE SHOULD BE INCLUDED IN index.php
  *
  * @author     Florent Bonomo
  */
@@ -101,15 +122,6 @@ class Kohana extends Kohana_Core
 
         // Enable the Kohana auto-loader for unserialization
         ini_set('unserialize_callback_func', 'spl_autoload_call');
-
-		// Load the files paths cache
-		if(Kohana::$caching === TRUE)
-		{
-			Kohana::$_files = Kohana::cache('Kohana::find_file()');
-		}
-
-		// Load the config & attach a file reader to config. Multiple readers are supported
-		Kohana::$config = Kohana_Config::instance()->attach(new Kohana_Config_File);
 		
 		// Get application name and language from server name
 		$sites = Kohana::load(APPSPATH.'sites.php');
@@ -123,6 +135,15 @@ class Kohana extends Kohana_Core
 		// Add Application path to global paths
 		array_unshift(Kohana::$_paths, APPPATH);
 
+		// Load the files paths cache
+		if(Kohana::$caching === TRUE)
+		{
+			Kohana::$_files = Kohana::cache('Kohana::find_file()');
+		}
+
+		// Load the config & attach a file reader to config. Multiple readers are supported
+		Kohana::$config = Kohana_Config::instance()->attach(new Kohana_Config_File);
+		
 		// If deployment is running, stop here
 		if(is_file(VARPATH.'deploying-'.APPNAME))
 		{
@@ -354,13 +375,15 @@ class Kohana extends Kohana_Core
 	 * @access	public
 	 * @static
 	 */
-	public static function cache($name, $data = NULL, $lifetime = 0)
+	public static function cache($name, $data = NULL, $lifetime = 0, $namespace = APPNAME)
 	{
+		$name = $namespace.$name;
+
 		if ($data === NULL)
 		{
 			// if cache to retrieve is find_file results, load it directly from apc
 			// (to avoid classes paths not being included in cache)
-			if($name === 'Kohana::find_file()')
+			if($name === $namespace.'Kohana::find_file()')
 			{
 				if(Kohana::$cache_driver === 'Apc')
 				{
@@ -453,3 +476,6 @@ class Kohana extends Kohana_Core
 	}
 
 }	// End Kohana
+
+// Init app
+Kohana::init();
