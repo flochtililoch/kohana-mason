@@ -108,7 +108,8 @@ class Kohana extends Kohana_Core
 		// Define application name and path, as well as cache path
 		define('APPNAME', $application['appname']);
 		define('APPPATH', realpath(APPSPATH.APPNAME).DIRECTORY_SEPARATOR);
-		define('CACHEPATH', realpath(VARPATH.'cache/'.APPNAME).DIRECTORY_SEPARATOR);
+		define('VARPATH', realpath(APPPATH.'var').DIRECTORY_SEPARATOR);
+		define('CACHEPATH', realpath(VARPATH.'cache').DIRECTORY_SEPARATOR);
 		
 		// Add Application path to global paths
 		array_unshift(Kohana::$_paths, APPPATH);
