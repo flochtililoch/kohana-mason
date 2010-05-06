@@ -3,6 +3,16 @@
 // Init app
 require __DIR__.'/init.php';
 
+// Create classes cache directory
+if(!is_dir(CACHEPATH.'classes'))
+{
+	// Create directory
+	mkdir(CACHEPATH.'classes', 0777, TRUE);
+
+	// Set permissions (must be manually set to fix umask issues)
+	chmod(CACHEPATH.'classes', 0777);
+}
+
 // Initiate Entity manager
 $orm = Orm::factory();
 

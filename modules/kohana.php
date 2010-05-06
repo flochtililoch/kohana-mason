@@ -62,6 +62,22 @@ class Kohana extends Kohana_Core
 	public static $cache_expire = 0;
 	
 	/**
+	 * Default locale
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $locale = 'fr_FR';
+	
+	/**
+	 * Default channel
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $channel = 1;
+	
+	/**
 	 * Include paths that are used to find files
 	 * before init paths modification
 	 *
@@ -100,13 +116,22 @@ class Kohana extends Kohana_Core
 
         // Enable the Kohana auto-loader for unserialization
         ini_set('unserialize_callback_func', 'spl_autoload_call');
-		
-		// Get application name and language from server name
-		$sites = Kohana::load(APPSPATH.'sites.php');
-		$application = $sites[$_SERVER['SERVER_NAME']];
 
-		// Define application name and path, as well as cache path
-		define('APPNAME', $application['appname']);
+		// If access from browser
+		if(array_key_exists('SERVER_NAME', $_SERVER))
+		{
+			// load domain config
+			$sites = Kohana::load(APPSPATH.'sites.php');
+			$application = $sites[$_SERVER['SERVER_NAME']];
+			
+			// define application name, environment, locale & channel
+			define('APPNAME', $application['appname']);
+			Kohana::$environment = $application['env'];
+			Kohana::$locale = $application['locale'];
+			Kohana::$channel = $application['channel'];
+		}
+		
+		// Define application, var & cache paths
 		define('APPPATH', realpath(APPSPATH.APPNAME).DIRECTORY_SEPARATOR);
 		define('VARPATH', realpath(APPPATH.'var').DIRECTORY_SEPARATOR);
 		define('CACHEPATH', realpath(VARPATH.'cache').DIRECTORY_SEPARATOR);
@@ -142,12 +167,6 @@ class Kohana extends Kohana_Core
 		if (Kohana::$profiling === TRUE)
 		{
 			$benchmark = Profiler::start('Kohana', __FUNCTION__);
-		}
-		
-		// Set environment type
-		if (isset($application['env']))
-		{
-			Kohana::$environment = $application['env'];
 		}
 		
 		// Set the default time zone
@@ -274,7 +293,7 @@ class Kohana extends Kohana_Core
 	    }
 
 		// Init Locale and Channel
-		I18n::init($application['locale'], $application['channel']);
+		I18n::init(Kohana::$locale, Kohana::$channel);
 
 		// Stop benchmarking
 		if(isset($benchmark))
@@ -296,10 +315,10 @@ class Kohana extends Kohana_Core
 			{
 				echo View::factory('profiler/stats');
 			}
+			
+			// Save persistent entities
+			Orm::save();
         }
-		
-		// Save persistent entities
-		Orm::save();
 	}
 
 	/**

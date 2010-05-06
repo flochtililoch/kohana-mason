@@ -46,7 +46,7 @@ class Component_I18n
 		return I18n::$_instances[I18n::$_locale];
 	}
 	
-		/**
+	/**
 	 * Get and set the target language.
 	 *
 	 * @param   string  locale string (e.g. fr_FR)
