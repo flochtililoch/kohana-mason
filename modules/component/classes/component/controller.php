@@ -35,12 +35,9 @@ class Component_Controller extends Kohana_Controller
     	    // Take the first component class name out of the components wrapping chain
     	    $comp = array_shift($base_comp::$_wrapping_chain);
 
-    		// If comp has a view attached
-    		if(class_exists($comp))
+    		// If comp has a views attached
+    		if(class_exists($comp) && ($views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views']))
     		{
-				// Work with controller's views only
-				$views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views'];
-
 				// Find locale / channel informations
 				$language = isset($views[I18n::language()]) ? I18n::language() : 'def';
 				$country = isset($views[$language][I18n::country()]) ? I18n::country() : 'def';
