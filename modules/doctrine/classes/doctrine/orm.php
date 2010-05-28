@@ -29,15 +29,19 @@ class Doctrine_Orm extends EntityManager
 		}
 		
 		// Set up drivers & configuration
-		$cache_driver = 'Doctrine\Common\Cache\\'.$db_config->cache_driver;
-		$cache = new $cache_driver;
-		$meta_driver = new Doctrine\ORM\Mapping\Driver\YamlDriver(Kohana::list_paths('model/yaml'));
-		
 		$config = new Configuration;
-		$config->setMetadataCacheImpl($cache);
-		$config->setQueryCacheImpl($cache);
-		$config->setMetadataDriverImpl($meta_driver);
-		$config->setAutoGenerateProxyClasses(FALSE);		
+		
+		// Config defines cache status
+		if(Kohana::$caching === TRUE)
+		{
+			$cache_driver = 'Doctrine\Common\Cache\\'.$db_config->cache_driver;
+			$cache = new $cache_driver;
+			$config->setMetadataCacheImpl($cache);
+			$config->setQueryCacheImpl($cache);
+		}
+		
+		$config->setMetadataDriverImpl(new Doctrine\ORM\Mapping\Driver\YamlDriver(Kohana::list_paths('model/yaml')));
+		$config->setAutoGenerateProxyClasses(FALSE);
 		
 		// Proxy configuration
 		$config->setProxyDir($db_config->paths['proxies']);
