@@ -276,7 +276,7 @@ class Kohana extends Kohana_Core
 		if(isset($settings['logging']) && $settings['logging'] === TRUE)
 		{
 			Kohana::$logging = TRUE;
-			Kohana::$log->attach(new Kohana_Log_File(VARPATH . 'log/' . APPNAME . '/kohana'));
+			Kohana::$log->attach(new Kohana_Log_File(VARPATH . 'log/kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
 		}
 		
 		// Load Components tree
