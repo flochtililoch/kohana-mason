@@ -10,13 +10,24 @@ use Doctrine\DBAL\Logging\SqlLogger;
  */
 class Doctrine_Profiler implements SqlLogger
 {
-
+	public static $log;
+	
     public function logSql($sql, array $params = null)
     {
-        if (is_object(Kohana::$log))
+        // Config defines log status
+		if (Kohana::$logging === TRUE)
 		{
-			// Add this exception to the log
-			Kohana::$log->add('PDO', $sql);
+			// Create Logger object
+			if(!is_object(self::$log))
+			{
+				self::$log = Kohana_Log::instance();
+				self::$log->attach(new Kohana_Log_File(VARPATH . 'log/doctrine', array('PDO')));
+			}
+			
+			// Add this query to the log
+			self::$log->add('PDO', $sql);
+			
+			// And its params if present
 			if ($params)
         	{
         		Kohana::$log->add('PDO', var_export($params, TRUE));
