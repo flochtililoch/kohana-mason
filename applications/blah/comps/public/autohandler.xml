@@ -9,7 +9,7 @@
 		// All is good so far
 		$login_failed = FALSE;
 
-		// Form posted ?
+		// Logging in via form post ?
 		if(isset($_POST['action']) && $_POST['action'] === 'login')
 		{
 			$remember_me = isset($_POST['remember_me']) ? (bool) $_POST['remember_me'] : FALSE;
@@ -35,12 +35,6 @@
 		{
 			// Set logged in flag
 			$logged_in = Auth::instance()->logged_in();
-		}
-		
-		// Try auto login if not already logged in
-		if($logged_in === FALSE)
-		{
-			$logged_in = Auth::instance()->auto_login();
 		}
 		
 		// If user is logged in
