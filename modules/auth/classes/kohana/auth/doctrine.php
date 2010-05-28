@@ -9,36 +9,7 @@
 class Kohana_Auth_Doctrine extends Auth
 {
     
-    // User object cache container
-    protected $_user = NULL;
-    
     /**
-	 * Returns Current user object
-	 * (cached for the request only)
-	 *
-	 * @param   string   username
-	 * @return  Entity\User
-	 */
-    public function get_user($login = NULL)
-	{
-		// If User hasn't been fetched yet
-		if($this->_user === NULL)
-		{
-			// If login param isn't set, try to get it from session
-			if($login === NULL)
-			{
-				$login = $this->session->get($this->config['session_key']);
-			}
-			// f from that point login is not null, try to fetch it from ORM
-			if($login !== NULL)
-			{
-				$this->_user = ORM::load('User')->findOneBy(array('login' => $login));
-			}
-		}
-		return $this->_user;
-	}
-    
-	/**
 	 * Checks if a session is active.
 	 *
 	 * @param   string   role entity / name
@@ -115,7 +86,7 @@ class Kohana_Auth_Doctrine extends Auth
 				$token->setUser($user);
 
 				// Set the autologin cookie
-				cookie::set('authautologin', $token->getHash(), $this->config['lifetime']);
+				cookie::set('authautologin', $token->getHash(), $this->_config['lifetime']);
 				
 				// Attach the token to the Entity manager
 				Orm::save($token);
@@ -172,13 +143,13 @@ class Kohana_Auth_Doctrine extends Auth
 					Auth_Doctrine::create_token($token);
 
 					// Set the autologin cookie
-					cookie::set('authautologin', $token->getHash(), $this->config['lifetime']);
+					cookie::set('authautologin', $token->getHash(), $this->_config['lifetime']);
 
 					// Complete the login with the found data
 					$this->complete_login($token->getUser()->getLogin());
 
 					// Automatic login was successful
-					return TRUE;
+					return $token->getUser();
 				}
 
 				// Token is invalid
@@ -187,6 +158,37 @@ class Kohana_Auth_Doctrine extends Auth
 		}
 
 		return FALSE;
+	}
+	
+	/**
+	 * Returns Current user object
+	 * (cached for the request only)
+	 *
+	 * @param   string   username
+	 * @return  Entity\User
+	 */
+    public function get_user($login = NULL)
+	{
+		// If User hasn't been fetched yet
+		if($this->_user === NULL)
+		{
+			// If login param isn't set, try to get it from session
+			if($login === NULL)
+			{
+				$login = parent::get_user();
+			}
+			// If from that point login is not null, try to fetch it from ORM
+			if($login === FALSE)
+			{
+				// check for "remembered" login
+				$this->_user = $this->auto_login();
+			}
+			elseif($login !== NULL)
+			{
+				$this->_user = ORM::load('User')->findOneBy(array('login' => $login));
+			}
+		}
+		return $this->_user;
 	}
 
 	/**
@@ -257,7 +259,7 @@ class Kohana_Auth_Doctrine extends Auth
 		}
 
 		// Set the expire time and hash of the user agent
-		$token->setExpires(time() + $this->config['lifetime']);
+		$token->setExpires(time() + $this->_config['lifetime']);
 		$token->setUserAgent(sha1(Request::$user_agent));
 
 		// Create a new token each time the token is saved
@@ -278,5 +280,29 @@ class Kohana_Auth_Doctrine extends Auth
 		
 		return $token;
 	}
+	
+	/**
+	 * Compare password with original (hashed). Works for current (logged in) user
+	 *
+	 * @param   string  $password
+	 * @return  boolean
+	 */
+	public function check_password($password)
+	{
+		$user = $this->get_user();
+
+		if ($user === FALSE)
+		{
+			// nothing to compare
+			return FALSE;
+		}
+
+		$hash = $this->hash_password($password, $this->find_salt($user->password));
+
+		return $hash == $user->password;
+	}
+	
+	// User object cache container
+    protected $_user = NULL;
 
 } // End Kohana_Auth_Doctrine
