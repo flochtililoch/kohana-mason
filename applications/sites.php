@@ -2,12 +2,6 @@
 
 return array
 (
-	'brain' => array(
-		'appname'	=> 'brain',
-		'locale'	=> 'fr_FR',
-		'channel'	=> 1,
-		'env'		=> Kohana::DEVELOPMENT
-		),
 	'blah.fr' => array(
 		'appname'	=> 'blah',
 		'locale'	=> 'fr_FR',
