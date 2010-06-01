@@ -47,7 +47,7 @@ class Component_Controller extends Kohana_Controller
 				$channel = isset($views[$language][$country][I18n::channel()]) ? I18n::channel() : 'def';
 				
 				// Set template file path
-				$file = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name.'/'.$views[$language][$country][$channel]['name'];
+				$file = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name.'/views/'.$views[$language][$country][$channel]['name'];
 		
 				// Set cache identifier
 				$cache_id = $views[$language][$country][$channel]['cache_id'];

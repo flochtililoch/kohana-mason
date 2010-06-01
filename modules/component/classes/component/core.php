@@ -13,6 +13,20 @@ class Component_Core
 	
 	const AUTOHANDLER = 'autohandler';
 	const DHANDLER = 'dhandler';
+	
+	/**
+	 * Type of entities files within the tree
+	 * @access	protected
+	 * @static
+	 */
+	protected static $_entities_types = array(
+		'xhtml' => 'views',
+		'css'	=> 'stylesheets',
+		'js'	=> 'scripts',
+		'png'	=> 'images',
+		'gif'	=> 'images',
+		'jpg'	=> 'images'
+		);
 
 	/**
 	 * Original paths per applications
@@ -358,24 +372,28 @@ class Component_Core
 			}
 
 			// If the entry is a view
-			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/(def|[a-zA-Z]{2})\.?(def|[a-zA-Z]{2})?\.?(def|\d+)?\.?xhtml$/', $entry, $view))
+			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/(def|[a-zA-Z]{2})\.?(def|[a-zA-Z]{2})?\.?(def|\d+)?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
 			{
-			    //  <language>.<country>.<channel>.xhtml
+				//  <language>.<country>.<channel>.xhtml
 				//      OR
 				//  <language>.<country>.xhtml (assumes default channel)
 				//      OR
 				//  <language>.xhtml (assumes default country & channel)
-			    $directory = $view[1];
+
+				$defaults = array('def', '');
+				$directory = $view[1];
 			    $controller = $view[2];
-			    $language = (!isset($view[3]) || $view[3] === 'def') ? 'def' : $view[3];
-			    $country = (!isset($view[4]) || $view[4] === 'def') ? 'def' : $view[4];
-			    $channel = (!isset($view[5]) || $view[5] === 'def') ? 'def' : $view[5];
-			    $view_file = (!isset($view[3]) ? 'def' : $view[3]).(!isset($view[4]) ? '' : '.'.$view[4]).(!isset($view[5]) ? '' : '.'.$view[5]);
-			    Component::$_tree['comps'][$tree][$directory][$controller]['views'][$language][$country][$channel]['name'] = $view_file;
-			    Component::$_tree['comps'][$tree][$directory][$controller]['views'][$language][$country][$channel]['cache_id'] = filemtime($file);
+				$entity_type = $view[3];
+			    $language = in_array($view[4], $defaults) ? 'def' : $view[4];
+			    $country = in_array($view[5], $defaults) ? 'def' : $view[5];
+			    $channel = in_array($view[6], $defaults) ? 'def' : $view[6];
+			    $entity_file = (in_array($view[4], $defaults) ? 'def' : $view[4]).(in_array($view[5], $defaults) ? '' : '.'.$view[5]).(in_array($view[6], $defaults) ? '' : '.'.$view[6]);
+
+			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$language][$country][$channel]['name'] = $entity_file;
+			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$language][$country][$channel]['cache_id'] = filemtime($file);
 			}
 		}
-
+		
 		// Catchall routes need to be reversed (deepest to shallowest)
 		foreach(Component::$_enabled_locales as $locale)
 		{
