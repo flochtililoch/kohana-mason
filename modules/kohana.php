@@ -111,14 +111,20 @@ class Kohana extends Kohana_Core
 		// Kohana is now initialized
 		Kohana::$_init = TRUE;
 		
+		// Determine if we are running in a command line environment
+		Kohana::$is_cli = (PHP_SAPI === 'cli');
+
+		// Determine if we are running in a Windows environment
+		Kohana::$is_windows = (DIRECTORY_SEPARATOR === '\\');
+		
 		// Enable the Kohana auto-loader
         spl_autoload_register(array('Kohana', 'auto_load'));
 
         // Enable the Kohana auto-loader for unserialization
         ini_set('unserialize_callback_func', 'spl_autoload_call');
 
-		// If access from browser
-		if(array_key_exists('SERVER_NAME', $_SERVER))
+		// Access from browser
+		if(!Kohana::$is_cli)
 		{
 			// load domain config
 			$sites = Kohana::load(APPSPATH.'sites.php');
@@ -129,6 +135,22 @@ class Kohana extends Kohana_Core
 			Kohana::$environment = $application['env'];
 			Kohana::$locale = $application['locale'];
 			Kohana::$channel = $application['channel'];
+		}
+		// Access from CLI
+		else
+		{
+			// Extract first arg provided as application name
+			$appname = (string) $_SERVER['argv'][1];
+			if(!is_dir(APPSPATH.$appname))
+			{
+				die("\n\nApplication [$appname] does not exists\n\n");
+			}
+			define('APPNAME', $appname);
+
+			// Remove it from args
+			unset($_SERVER['argv'][1]);
+			$argv = array_values($_SERVER['argv']);
+			var_dump($_SERVER['argv']);
 		}
 		
 		// Define application, var & cache paths
@@ -242,12 +264,6 @@ class Kohana extends Kohana_Core
 			// Exit with an error status
 			exit(1);
 		}
-
-		// Determine if we are running in a command line environment
-		Kohana::$is_cli = (PHP_SAPI === 'cli');
-
-		// Determine if we are running in a Windows environment
-		Kohana::$is_windows = (DIRECTORY_SEPARATOR === '\\');
 
 		// Set the system character set
 		if(isset($settings['charset']))

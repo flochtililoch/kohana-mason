@@ -1,7 +1,7 @@
 <?php
 
-// Init app
-require __DIR__.'/init.php';
+// Bootstrap app
+require __DIR__.'/../bootstrap.php';
 
 // Create classes cache directory
 if(!is_dir(CACHEPATH.'classes'))
