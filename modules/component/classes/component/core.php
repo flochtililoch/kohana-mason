@@ -367,6 +367,9 @@ class Component_Core
 				//  <language>.<country>.xhtml (assumes default channel)
 				//      OR
 				//  <language>.xhtml (assumes default country & channel)
+// NE PLUS STOCKER LE CHANNEL DANS LES VUES, MAIS METTRE LE CHANNEL DANS LA CLE DE CACHE DU TREE PLUTOT
+// STOCKE LES VIEWS DANS UNE VARIABLE TEMPORAIRE. UNE FOIS TOUTES LES VUES SCANNEES, DECIDE DESQUELS DOIVENT ETRE INCLUSES
+// Regle differente pour xhtml et assets (1 possible pr html, plusieurs possibles pr les assets)
 
 				$defaults = array('def', '');
 				$directory = $view[1];
