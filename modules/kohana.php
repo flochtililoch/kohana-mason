@@ -327,11 +327,12 @@ class Kohana extends Kohana_Core
 		// If no source is specified, the URI will be automatically detected.
         if(Kohana::$is_cli === FALSE)
 		{
-			echo Request::instance()
-				->execute()
-				->send_headers()
-				->response;
-				
+			$request = Request::instance()
+						->execute()
+						->send_headers();
+
+			echo $request;
+			
 			// Echo profile results
 			if($settings['profile'] === TRUE)
 			{
