@@ -40,7 +40,7 @@ class Component_Core
 	 * @access	protected
 	 * @static
 	 */
-	protected static $_enabled_locales = array();
+	protected static $_locales = array();
 	
 	/**
 	 * Locales to process when building the tree
@@ -76,7 +76,7 @@ class Component_Core
 		}
 		
 		// Init locales container
-		Component::$_enabled_locales = array();
+		Component::$_locales = array();
 		
 		// Loop through all existing sites
 		foreach(Kohana::load(APPSPATH.'sites.php') as $application)
@@ -85,7 +85,7 @@ class Component_Core
 			if($application['appname'] === $appname)
 			{
 				// Save its locale
-				Component::$_enabled_locales[] = $application['locale'];
+				Component::$_locales[$application['locale']][] = $application['channel'];
 			}
 		}
 		
@@ -265,10 +265,7 @@ class Component_Core
 		{
 		    // Prepare routes containers
     		Component::$_tree['routes'] = array('internal' => array(), 'external' => array());
-			foreach(Component::$_enabled_locales as $locale)
-			{
-				Component::$_tree['routes']['external'][$locale] = array();
-			}
+			Component::$_tree['routes']['external'] = array();
 
 		    // Loop through comps tree 
 		    foreach(array_merge(Component::$_internal_trees, Component::$_external_trees) as $dir)
@@ -310,13 +307,7 @@ class Component_Core
 		// Prepare variables
 		$comps = array();
 		$routes_defaults = array('catchall' => array(), 'controller' => array());
-		$routes = array('internal' => $routes_defaults, 'external' => array());
-		
-		// Only external routes needs to be translated
-		foreach(Component::$_enabled_locales as $locale)
-		{
-			$routes['external'][$locale] =  $routes_defaults;
-		}
+		$routes = array('internal' => $routes_defaults, 'external' => $routes_defaults);
 		
 		// Flattern file list
 		array_walk_recursive(
@@ -357,10 +348,7 @@ class Component_Core
 					// Only external routes needs to be translated
 					if(in_array($path, Component::$_external_trees))
 					{
-						foreach(Component::$_enabled_locales as $locale)
-						{
-							$routes['external'][$locale][($controller === Component::DHANDLER ? 'catchall' : 'controller')][$tree.'/'.$directory.$controller] = Component::_route($comp, $tree, $locale);
-						}
+						$routes['external'][($controller === Component::DHANDLER ? 'catchall' : 'controller')][$tree.'/'.$directory.$controller] = Component::_route($comp, $tree, Kohana::$locale);
 					}
 					if(in_array($path, Component::$_internal_trees))
 					{
@@ -372,7 +360,7 @@ class Component_Core
 			}
 
 			// If the entry is a view
-			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/(def|[a-zA-Z]{2})\.?(def|[a-zA-Z]{2})?\.?(def|\d+)?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
+			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/(def|'.I18n::language().')\.?(def|'.I18n::country().')?\.?(def|'.I18n::channel().')?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
 			{
 				//  <language>.<country>.<channel>.xhtml
 				//      OR
@@ -389,16 +377,12 @@ class Component_Core
 			    $channel = in_array($view[6], $defaults) ? 'def' : $view[6];
 			    $entity_file = (in_array($view[4], $defaults) ? 'def' : $view[4]).(in_array($view[5], $defaults) ? '' : '.'.$view[5]).(in_array($view[6], $defaults) ? '' : '.'.$view[6]);
 
-			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$language][$country][$channel]['name'] = $entity_file;
-			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$language][$country][$channel]['cache_id'] = filemtime($file);
+			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$channel]['name'] = $entity_file;
+			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$channel]['cache_id'] = filemtime($file);
 			}
 		}
-		
-		// Catchall routes need to be reversed (deepest to shallowest)
-		foreach(Component::$_enabled_locales as $locale)
-		{
-			Component::$_tree['routes']['external'][$locale] += $routes['external'][$locale]['controller'] + array_reverse($routes['external'][$locale]['catchall']);
-		}
+
+		Component::$_tree['routes']['external'] += $routes['external']['controller'] + array_reverse($routes['external']['catchall']);
 		Component::$_tree['routes']['internal'] += $routes['internal']['controller'] + array_reverse($routes['internal']['catchall']);
 	}
 	

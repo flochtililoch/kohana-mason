@@ -41,16 +41,13 @@ class Component_Controller extends Kohana_Controller
 				// Work with controller's views only
 				$views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views'];
 
-				// Find locale / channel informations
-				$language = isset($views[I18n::language()]) ? I18n::language() : 'def';
-				$country = isset($views[$language][I18n::country()]) ? I18n::country() : 'def';
-				$channel = isset($views[$language][$country][I18n::channel()]) ? I18n::channel() : 'def';
-				
+				$channel = array_key_exists(Kohana::$channel, $views) ? Kohana::$channel : 'def';
+	
 				// Set template file path
-				$file = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name.'/views/'.$views[$language][$country][$channel]['name'];
+				$file = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name.'/views/'.$views[$channel]['name'];
 		
 				// Set cache identifier
-				$cache_id = $views[$language][$country][$channel]['cache_id'];
+				$cache_id = $views[$channel]['cache_id'];
 				
 				// Find which class to use to load the view
 				$view_engine = $comp::$_view_engine ? $comp::$_view_engine : Kohana::config('view.engine');
@@ -59,7 +56,7 @@ class Component_Controller extends Kohana_Controller
 				$this->request->response = new $view_engine($file, $comp, $cache_id);
 			
 				// Return view result
-    			return $this->request->response;
+    			return $this->request;
     		}
     		else
     		{

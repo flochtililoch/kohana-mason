@@ -53,7 +53,7 @@ class Component_Request extends Kohana_Request
 		$uri = trim($uri, '/');
 
 		// Load routes
-		$routes = Route::all() + ($routes !== NULL ? $routes : Kohana::$tree['routes']['external'][I18n::locale()]);
+		$routes = Route::all() + ($routes !== NULL ? $routes : Kohana::$tree['routes']['external']);
 
 		foreach ($routes as $name => $route)
 		{

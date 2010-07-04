@@ -300,9 +300,12 @@ class Kohana extends Kohana_Core
 			Kohana::$logging = TRUE;
 			Kohana::$log->attach(new Kohana_Log_File(VARPATH . 'log/kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
 		}
+
+		// Init Locale and Channel
+		I18n::init(Kohana::$locale, Kohana::$channel);
 		
 		// Load Components tree
-		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree'))  )
+		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree_'.Kohana::$locale))  )
 		{
 			Component::init();
 			Kohana::$tree = Component::tree();
@@ -310,12 +313,9 @@ class Kohana extends Kohana_Core
 		    if(Kohana::$caching === TRUE)
 			{
 			    // tree cache never expire
-				Kohana::cache('tree', Kohana::$tree, 0);
+				Kohana::cache('tree_'.Kohana::$locale, Kohana::$tree, 0);
 			}
 	    }
-
-		// Init Locale and Channel
-		I18n::init(Kohana::$locale, Kohana::$channel);
 
 		// Stop benchmarking
 		if(isset($benchmark))
