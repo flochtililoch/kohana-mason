@@ -60,7 +60,7 @@ class Component_Controller extends Kohana_Controller
 				$cache_key = $this->_cache_key !== NULL ? $this->_cache_key : $path;
 				
 				// If the combination of assets for this type of execution has not been cached yet
-				if(!(property_exists($this, $_assets) && is_array($this->_assets) && array_key_exists($cache_key, $this->_assets)))
+				if(!(property_exists($this, '_assets') && is_array($this->_assets) && array_key_exists($cache_key, $this->_assets)))
 				{
 					// Store scripts and stylesheets in main request for separate loading
 					foreach(array('scripts', 'stylesheets') as $type)
