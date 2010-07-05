@@ -332,8 +332,7 @@ class Kohana extends Kohana_Core
 						->send_headers();
 			
 			echo $request;
-			echo Kohana::debug(Request::$instance->scripts);
-			echo Kohana::debug(Request::$instance->stylesheets);
+
 			// Echo profile results
 			if($settings['profile'] === TRUE)
 			{

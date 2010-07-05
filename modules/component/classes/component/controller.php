@@ -36,7 +36,7 @@ class Component_Controller extends Kohana_Controller
     	    $comp = array_shift($base_comp::$_wrapping_chain);
 
     		// If comp has attached views
-    		if(class_exists($comp) && array_key_exists('views', Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]))
+    		if(class_exists($comp))
     		{
 				// Work with controller's entities only
 				$entities = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name];
@@ -46,19 +46,20 @@ class Component_Controller extends Kohana_Controller
 				
 				$path = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name;
 				
-				// Store scripts and stylesheets in main request for separate loading
-				foreach(array('views', 'scripts', 'stylesheets') as $type)
+				if(array_key_exists('views', Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]))
 				{
-					if($type === 'views')
-					{
-						// Build view object
-						$this->request->response = new $view_engine(
-							$path.'/'.$type.'/'.$entities[$type]['name'],
-							$comp,
-							$entities[$type]['cache_id']
-							);
-					}
-					elseif(array_key_exists($type, $entities))
+					// Build view object
+					$this->request->response = new $view_engine(
+						$path.'/views/'.$entities['views']['name'],
+						$comp,
+						$entities['views']['cache_id']
+						);
+				}
+				
+				// Store scripts and stylesheets in main request for separate loading
+				foreach(array('scripts', 'stylesheets') as $type)
+				{
+					if(array_key_exists($type, $entities))
 					{
 						// Make sure files are sorted in the right order
 						ksort($entities[$type]);
