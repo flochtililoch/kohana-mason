@@ -309,6 +309,14 @@ class Component_Core
 		$routes_defaults = array('catchall' => array(), 'controller' => array());
 		$routes = array('internal' => $routes_defaults, 'external' => $routes_defaults);
 		
+		// List of allowed entities' names
+		$allowed_entities = array(
+			I18n::language().'.'.I18n::country().'.'.I18n::channel(),
+			I18n::language().'.'.I18n::country(),
+			I18n::language(),
+			'def',
+			);
+
 		// Flattern file list
 		array_walk_recursive(
 			$files,
@@ -358,30 +366,35 @@ class Component_Core
 				Component::$_tree['comps'][$tree][$directory][$controller]['inherit'] = Component::_inherit($comp, $comps, $path);
 				Component::$_tree['cache_ids']['controller_'.str_replace('/', '_', $tree.'/'.$directory.$controller)] = filemtime($file);
 			}
-
-			// If the entry is a view
-			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/(def|'.I18n::language().')\.?(def|'.I18n::country().')?\.?(def|'.I18n::channel().')?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
+			
+			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/('.implode('|', $allowed_entities).')?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
 			{
-				//  <language>.<country>.<channel>.xhtml
-				//      OR
-				//  <language>.<country>.xhtml (assumes default channel)
-				//      OR
-				//  <language>.xhtml (assumes default country & channel)
-// NE PLUS STOCKER LE CHANNEL DANS LES VUES, MAIS METTRE LE CHANNEL DANS LA CLE DE CACHE DU TREE PLUTOT
-// STOCKE LES VIEWS DANS UNE VARIABLE TEMPORAIRE. UNE FOIS TOUTES LES VUES SCANNEES, DECIDE DESQUELS DOIVENT ETRE INCLUSES
-// Regle differente pour xhtml et assets (1 possible pr html, plusieurs possibles pr les assets)
-
-				$defaults = array('def', '');
 				$directory = $view[1];
 			    $controller = $view[2];
 				$entity_type = $view[3];
-			    $language = in_array($view[4], $defaults) ? 'def' : $view[4];
-			    $country = in_array($view[5], $defaults) ? 'def' : $view[5];
-			    $channel = in_array($view[6], $defaults) ? 'def' : $view[6];
-			    $entity_file = (in_array($view[4], $defaults) ? 'def' : $view[4]).(in_array($view[5], $defaults) ? '' : '.'.$view[5]).(in_array($view[6], $defaults) ? '' : '.'.$view[6]);
-
-			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$channel]['name'] = $entity_file;
-			    Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$channel]['cache_id'] = filemtime($file);
+				$entity_file = $view[4];
+				
+				// Apply a specific rule for views :
+				// Each controller can just have one view associated.
+				// Here we're looking for the highest ranked filename's in $allowed_entities.
+				// Others entities are all retrieved and ordered by rank
+				switch($entity_type)
+				{
+					case 'views':
+						$current = array_key_exists($entity_type, Component::$_tree['comps'][$tree][$directory][$controller]) ? Component::$_tree['comps'][$tree][$directory][$controller][$entity_type] : array('name' => NULL);
+						if($current['name'] === NULL || array_search($current['name'], $allowed_entities) > array_search($entity_file, $allowed_entities))
+						{
+							Component::$_tree['comps'][$tree][$directory][$controller][$entity_type]['name'] = $entity_file;
+							Component::$_tree['comps'][$tree][$directory][$controller][$entity_type]['cache_id'] = filemtime($file);
+						}
+						break;
+						
+					default:
+						$idx = array_search($entity_file, $allowed_entities);
+						Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$idx]['name'] = $entity_file;
+						Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$idx]['cache_id'] = filemtime($file);
+						break;
+				}
 			}
 		}
 

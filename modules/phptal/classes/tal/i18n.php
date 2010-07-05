@@ -4,7 +4,7 @@
  * I18n Class
  * PHPTAL_TranslationService GetText implementation.
  *
- * @package		Component
+ * @package		PHPTAL
  * @author 		Laurent Bedubourg <lbedubourg@motion-twin.com>
  * @author		Florent Bonomo
  */

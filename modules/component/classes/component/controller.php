@@ -38,23 +38,35 @@ class Component_Controller extends Kohana_Controller
     		// If comp has attached views
     		if(class_exists($comp) && array_key_exists('views', Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]))
     		{
-				// Work with controller's views only
-				$views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views'];
-
-				$channel = array_key_exists(Kohana::$channel, $views) ? Kohana::$channel : 'def';
-	
-				// Set template file path
-				$file = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name.'/views/'.$views[$channel]['name'];
-		
-				// Set cache identifier
-				$cache_id = $views[$channel]['cache_id'];
+				// Work with controller's entities only
+				$entities = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name];
 				
 				// Find which class to use to load the view
 				$view_engine = $comp::$_view_engine ? $comp::$_view_engine : Kohana::config('view.engine');
 				
-				// Build view object
-				$this->request->response = new $view_engine($file, $comp, $cache_id);
-			
+				$path = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name;
+				
+				// Store scripts and stylesheets in main request for separate loading
+				foreach(array('views', 'scripts', 'stylesheets') as $type)
+				{
+					if($type === 'views')
+					{
+						// Build view object
+						$this->request->response = new $view_engine(
+							$path.'/'.$type.'/'.$entities[$type]['name'],
+							$comp,
+							$entities[$type]['cache_id']
+							);
+					}
+					elseif(array_key_exists($type, $entities))
+					{
+						// Make sure files are sorted in the right order
+						ksort($entities[$type]);
+						Request::$instance->{$type}[] = array($path.'/'.$type.'/' => array_values($entities[$type]));
+						
+					}
+				}
+				
 				// Return view result
     			return $this->request;
     		}

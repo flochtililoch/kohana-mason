@@ -4,7 +4,7 @@
  * Class Context
  * Extends PHPTAL Context class
  *
- * @package    Component
+ * @package    PHPTAL
  * @author     Florent Bonomo
  */
 class Tal_Context extends PHPTAL_Context

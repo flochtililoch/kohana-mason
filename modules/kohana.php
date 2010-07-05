@@ -305,7 +305,7 @@ class Kohana extends Kohana_Core
 		I18n::init(Kohana::$locale, Kohana::$channel);
 		
 		// Load Components tree
-		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree_'.Kohana::$locale))  )
+		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree_'.Kohana::$locale.'_'.Kohana::$channel))  )
 		{
 			Component::init();
 			Kohana::$tree = Component::tree();
@@ -313,7 +313,7 @@ class Kohana extends Kohana_Core
 		    if(Kohana::$caching === TRUE)
 			{
 			    // tree cache never expire
-				Kohana::cache('tree_'.Kohana::$locale, Kohana::$tree, 0);
+				Kohana::cache('tree_'.Kohana::$locale.'_'.Kohana::$channel, Kohana::$tree, 0);
 			}
 	    }
 
@@ -330,9 +330,10 @@ class Kohana extends Kohana_Core
 			$request = Request::instance()
 						->execute()
 						->send_headers();
-
-			echo $request;
 			
+			echo $request;
+			echo Kohana::debug(Request::$instance->scripts);
+			echo Kohana::debug(Request::$instance->stylesheets);
 			// Echo profile results
 			if($settings['profile'] === TRUE)
 			{

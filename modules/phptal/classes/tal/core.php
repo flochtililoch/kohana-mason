@@ -4,7 +4,7 @@
  * Tal Class
  * Extends PHPTAL class
  *
- * @package    Component
+ * @package    PHPTAL
  * @author     Florent Bonomo
  */
 class Tal_Core extends PHPTAL
