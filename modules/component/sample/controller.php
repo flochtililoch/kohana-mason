@@ -57,6 +57,13 @@ class %2$s extends %3$s
 	protected static $_wrapping_chain = NULL;
 	
 	/**
+	 * Cache key
+	 *
+	 * @access	protected
+	 */
+	protected $_cache_key = NULL;
+	
+	/**
 	 * Controller default action method
 	 *
 	 * @return	void
