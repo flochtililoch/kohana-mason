@@ -55,7 +55,7 @@ class Component_Controller extends Kohana_Controller
 						$entities['views']['cache_id']
 						);
 				}
-				
+				echo Kohana::debug($this->request);
 				// Store scripts and stylesheets in main request for separate loading
 				foreach(array('scripts', 'stylesheets') as $type)
 				{
@@ -65,6 +65,14 @@ class Component_Controller extends Kohana_Controller
 						ksort($entities[$type]);
 						Request::$instance->{$type}[] = array($path.'/'.$type.'/' => array_values($entities[$type]));
 						
+						// First Request :
+						// Cache assets content in a file named after the SHA of the assets array
+						// Set in the controller class file (in the cache) a new private property
+						// an associative array having the sha of the assets as a key
+						// and an array of sha's of parametres as value
+						// Next Requests : 
+						// do not loop thru assets, just sha the parametres and do something with it to get the wanted file...damn it!...
+						// 
 					}
 				}
 				
