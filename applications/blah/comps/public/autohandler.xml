@@ -1,7 +1,8 @@
 <comp>
 	<attr>
-		<key name="my_attr">'inherited from autohandler'</key>
+		<key name="my_attr" visibility="private">'inherited from autohandler'</key>
 		<key name="logged_in">NULL</key>
+		<key name="_assets_cache_key">'test'</key>
 	</attr>
 	<php>
 		<![CDATA[

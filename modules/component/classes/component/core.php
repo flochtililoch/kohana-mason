@@ -183,13 +183,34 @@ class Component_Core
 		// Load xml component
 		$xml = simplexml_load_file($xml_comp);
 
+		// Set defaults attributes
+		$attributes = array(
+			'_assets_cache_key' => 'protected $_assets_cache_key = \''.$path.'/'.$directory.'_'.$controller.'\';'
+		);
+		
 		// Compile attributes
-		$attributes = array();
 		foreach($xml->attr as $keys)
 		{
-			foreach($keys->key as $value => $key)
+			foreach($keys->key as $key)
 			{
-				$attributes[] = sprintf('public $%1$s = %2$s;', $key->attributes()->__toString(), $key[0]);
+				// Retrieve all XML tags within <attr/>
+				$tag_attributes = array();
+				foreach($key->attributes() as $name => $value)
+				{
+					$tag_attributes[$name] = $value->__toString();
+				}
+				// If the current tag contains a 'name' attribute
+				if(array_key_exists('name', $tag_attributes))
+				{
+					$attributes[$tag_attributes['name']] = sprintf(
+						'%1$s $%2$s = %3$s;',
+						array_key_exists('visibility', $tag_attributes) ? 
+							$tag_attributes['visibility'] :
+							(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
+						$tag_attributes['name'],
+						$key[0]
+						);
+				}
 			}
 		}
 
