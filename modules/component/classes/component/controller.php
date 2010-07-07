@@ -71,15 +71,15 @@ class Component_Controller extends Kohana_Controller
 						}
 					}
 					
-					// Merge component's assets with main request current assets
-					Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets);
-					
 					if(Kohana::$caching === TRUE)
 					{
 						// Assets cache never expire
 						Kohana::cache('assets_'.$path, $assets, 0);
 					}
 				}
+				
+				// Merge component's assets with main request current assets
+				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets);
 
 				// Return view result
     			return $this->request;
