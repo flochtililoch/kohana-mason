@@ -60,17 +60,20 @@ class Component_Controller extends Kohana_Controller
 				if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
 				{
 					// Retrieve scripts and stylesheets for this specific component
-					$assets = array();
+					$assets = array($comp::$_assets_cache_key => array());
 					foreach(array('scripts', 'stylesheets') as $type)
 					{
 						if(array_key_exists($type, $entities))
 						{
 							// Make sure files are sorted in the right order
 							ksort($entities[$type]);
-							$assets[$type][$comp::$_assets_cache_key] = array($path.'/'.$type.'/' => array_values($entities[$type]));
+							foreach($entities[$type] as $entity)
+							{
+								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = $entity['cache_id'];
+							}
 						}
 					}
-					
+
 					if(Kohana::$caching === TRUE)
 					{
 						// Assets cache never expire
@@ -79,7 +82,7 @@ class Component_Controller extends Kohana_Controller
 				}
 				
 				// Merge component's assets with main request current assets
-				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets);
+				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets[$comp::$_assets_cache_key]);
 
 				// Return view result
     			return $this->request;
