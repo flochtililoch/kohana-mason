@@ -48,5 +48,6 @@
 	<process>
 		<key name="logged_in" context="global">$logged_in</key>
 		<key name="login_failed" context="global">$login_failed</key>
+		<key name="cdn">Request::$instance->cdn</key>
 	</process>
 </comp>

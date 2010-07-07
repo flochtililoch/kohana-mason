@@ -8,9 +8,9 @@ return array
 		'channel'	=> 102,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'http://assets1.blah.fr/',
-			'#2' => 'http://assets2.blah.fr/',
-			'#3' => 'http://assets3.blah.fr/'
+			'#1' => 'assets1.blah.fr',
+			'#2' => 'assets2.blah.fr',
+			'#3' => 'assets3.blah.fr'
 			)	
 		),
 	'blah.es' => array(
@@ -19,9 +19,9 @@ return array
 		'channel'	=> 103,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'http://assets1.blah.es/',
-			'#2' => 'http://assets2.blah.es/',
-			'#3' => 'http://assets3.blah.es/'
+			'#1' => 'assets1.blah.es',
+			'#2' => 'assets2.blah.es',
+			'#3' => 'assets3.blah.es'
 			)
 		),
 	'blah.co.uk' => array(
@@ -30,9 +30,9 @@ return array
 		'channel'	=> 3,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'http://assets1.blah.co.uk/',
-			'#2' => 'http://assets2.blah.co.uk/',
-			'#3' => 'http://assets3.blah.co.uk/'
+			'#1' => 'assets1.blah.co.uk',
+			'#2' => 'assets2.blah.co.uk',
+			'#3' => 'assets3.blah.co.uk'
 			)
 		)
 );
