@@ -61,6 +61,11 @@ class Component_Controller extends Kohana_Controller
 				{
 					// Retrieve scripts and stylesheets for this specific component
 					$assets = array($comp::$_assets_cache_key => array());
+					
+					// Find which CDN to use
+					$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
+					
+					// Loop trough assets type
 					foreach(array('scripts', 'stylesheets') as $type)
 					{
 						if(array_key_exists($type, $entities))
@@ -69,7 +74,10 @@ class Component_Controller extends Kohana_Controller
 							ksort($entities[$type]);
 							foreach($entities[$type] as $entity)
 							{
-								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = $entity['cache_id'];
+								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = array(
+									'cdn' => Request::$instance->cdn[$cdn_key],
+									'cache_id' => $entity['cache_id']
+									);
 							}
 						}
 					}
