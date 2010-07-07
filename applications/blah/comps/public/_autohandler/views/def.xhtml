@@ -1,11 +1,15 @@
+<tal:block metal:fill-slot="body">
+	<div style="border:1px solid lightblue; padding:10px;">
+    	/autohandler.xml
+    	<div tal:replace="structure after"/>
+    </div>
+	<script type="text/javascript" tal:repeat="script request/assets/scripts" tal:attributes="src repeat/script/key"/>
+</tal:block>
+<tal:block metal:fill-slot="head">
+	<title i18n:translate="">Hello World!</title>
+	<link type="text/css" tal:repeat="stylesheet request/assets/stylesheets" tal:attributes="src repeat/stylesheet/key"/>
+</tal:block>
 <html xmlns:i18n="http://xml.zope.org/namespaces/i18n" xmlns:tal="http://xml.zope.org/namespaces/tal">
-    <head>
-        <title i18n:translate="">Hello World!</title>
-    </head>
-    <body>
-        <div style="border:1px solid lightblue; padding:10px;">
-        	/autohandler.xml
-        	<div tal:replace="structure after"/>
-        </div>
-    </body>
+    <head metal:define-slot="head"/>
+    <body metal:define-slot="body"/>
 </html>
