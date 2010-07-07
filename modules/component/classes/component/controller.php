@@ -60,36 +60,27 @@ class Component_Controller extends Kohana_Controller
 				if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
 				{
 					// Retrieve scripts and stylesheets for this specific component
-					$assets = array($comp::$_assets_cache_key => array());
+					$assets = array();
 					foreach(array('scripts', 'stylesheets') as $type)
 					{
 						if(array_key_exists($type, $entities))
 						{
 							// Make sure files are sorted in the right order
 							ksort($entities[$type]);
-							$assets[$comp::$_assets_cache_key][$type] = array($path.'/'.$type.'/' => array_values($entities[$type]));
+							$assets[$type][$comp::$_assets_cache_key] = array($path.'/'.$type.'/' => array_values($entities[$type]));
 						}
 					}
 					
-					// For non dev environments, use the packed version of assets
-					if(Kohana::$environment === Kohana::DEVELOPMENT)
-					{
-						$assets = sha1(serialize($assets));
-					}
+					// Merge component's assets with main request current assets
+					Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets);
 					
 					if(Kohana::$caching === TRUE)
 					{
 						// Assets cache never expire
 						Kohana::cache('assets_'.$path, $assets, 0);
 					}
-					// Cache assets content in a file named after the SHA of the assets array
-					// Set in the controller class file (in the cache) a new private property
-					// an associative array having the sha of the assets as a key
-					// and an array of sha's of parametres as value
-					// Next Requests : 
-					// do not loop thru assets, just sha the parametres and do something with it to get the wanted file...damn it!...
 				}
-				echo Kohana::debug($assets);
+
 				// Return view result
     			return $this->request;
     		}

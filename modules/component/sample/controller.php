@@ -61,7 +61,7 @@ class %2$s extends %3$s
 	 *
 	 * @access	protected
 	 */
-	protected static $_assets_cache_key = 0;
+	protected static $_assets_cache_key = '';
 	
 	/**
 	 * Controller default action method

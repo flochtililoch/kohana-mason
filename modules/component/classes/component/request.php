@@ -15,6 +15,16 @@ class Component_Request extends Kohana_Request
 	 * @access	public
 	 */
     public $parent = NULL;
+	
+	/**
+     * Request's assets container
+     *
+	 * @access	public
+	 */
+    public $assets = array(
+		'scripts' => array(),
+		'stylesheets' => array()
+		);
 
 	/**
 	 * Creates a new request object for the given URI.
