@@ -184,9 +184,7 @@ class Component_Core
 		$xml = simplexml_load_file($xml_comp);
 
 		// Set defaults attributes
-		$attributes = array(
-			'_assets_cache_key' => 'protected $_assets_cache_key = \''.$path.'/'.$directory.'_'.$controller.'\';'
-		);
+		$attributes = array();
 		
 		// Compile attributes
 		foreach($xml->attr as $keys)

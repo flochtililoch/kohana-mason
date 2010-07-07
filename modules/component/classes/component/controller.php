@@ -56,32 +56,40 @@ class Component_Controller extends Kohana_Controller
 						);
 				}
 				
-				// Cache key is used to retrieve list of assets to load for this component
-				$assets_cache_key = $this->_assets_cache_key !== NULL ? $this->_assets_cache_key : $path;
-				
 				// If the combination of assets for this type of execution has not been cached yet
-				if(!(property_exists($this, '_assets') && is_array($this->_assets) && array_key_exists($assets_cache_key, $this->_assets)))
+				if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
 				{
-					// Store scripts and stylesheets in main request for separate loading
+					// Retrieve scripts and stylesheets for this specific component
+					$assets = array($comp::$_assets_cache_key => array());
 					foreach(array('scripts', 'stylesheets') as $type)
 					{
 						if(array_key_exists($type, $entities))
 						{
 							// Make sure files are sorted in the right order
 							ksort($entities[$type]);
-							Request::$instance->{$type}[] = array($path.'/'.$type.'/' => array_values($entities[$type]));
-						
-							// Cache assets content in a file named after the SHA of the assets array
-							// Set in the controller class file (in the cache) a new private property
-							// an associative array having the sha of the assets as a key
-							// and an array of sha's of parametres as value
-							// Next Requests : 
-							// do not loop thru assets, just sha the parametres and do something with it to get the wanted file...damn it!...
-							// 
+							$assets[$comp::$_assets_cache_key][$type] = array($path.'/'.$type.'/' => array_values($entities[$type]));
 						}
 					}
+					
+					// For non dev environments, use the packed version of assets
+					if(Kohana::$environment === Kohana::DEVELOPMENT)
+					{
+						$assets = sha1(serialize($assets));
+					}
+					
+					if(Kohana::$caching === TRUE)
+					{
+						// Assets cache never expire
+						Kohana::cache('assets_'.$path, $assets, 0);
+					}
+					// Cache assets content in a file named after the SHA of the assets array
+					// Set in the controller class file (in the cache) a new private property
+					// an associative array having the sha of the assets as a key
+					// and an array of sha's of parametres as value
+					// Next Requests : 
+					// do not loop thru assets, just sha the parametres and do something with it to get the wanted file...damn it!...
 				}
-				
+				echo Kohana::debug($assets);
 				// Return view result
     			return $this->request;
     		}

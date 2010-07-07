@@ -57,6 +57,13 @@ class %2$s extends %3$s
 	protected static $_wrapping_chain = NULL;
 	
 	/**
+	 * Component's assets cache key
+	 *
+	 * @access	protected
+	 */
+	protected static $_assets_cache_key = 0;
+	
+	/**
 	 * Controller default action method
 	 *
 	 * @return	void
