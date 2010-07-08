@@ -76,7 +76,7 @@ class Component_Controller extends Kohana_Controller
 							{
 								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 									'host' => Request::$instance->cdn[$cdn_key],
-									'path' => str_replace('/', '-', $path),
+									'path' => $path,
 									'name' => $entity['name'],
 									'cache_id' => $entity['cache_id']
 									);
