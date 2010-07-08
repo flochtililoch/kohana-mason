@@ -76,7 +76,7 @@ class Component_Controller extends Kohana_Controller
 							{
 								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 									'host' => Request::$instance->cdn[$cdn_key],
-									'path' => str_replace('/', '_', $path),
+									'path' => str_replace('/', '-', $path),
 									'name' => $entity['name'],
 									'cache_id' => $entity['cache_id']
 									);
@@ -86,11 +86,19 @@ class Component_Controller extends Kohana_Controller
 
 					if(Kohana::$caching === TRUE)
 					{
+						// If non-dev env., pack assets in one single file named after the assets array md5ed
+						// Each comp would then have a single file, compressed.
+						// One top level caching should be then done
+						// Need to think about what would be best suited for performance :
+						// one single file based on the combination of all components assets ?
+						// or one file per autohandler level ?
+						// or a combination of both ?
+						
 						// Assets cache never expire
 						Kohana::cache('assets_'.$path, $assets, 0);
 					}
 				}
-				
+
 				// Merge component's assets with main request current assets
 				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets[$comp::$_assets_cache_key]);
 

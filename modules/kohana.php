@@ -150,7 +150,6 @@ class Kohana extends Kohana_Core
 			// Remove it from args
 			unset($_SERVER['argv'][1]);
 			$argv = array_values($_SERVER['argv']);
-			var_dump($_SERVER['argv']);
 		}
 		
 		// Define application, var & cache paths
