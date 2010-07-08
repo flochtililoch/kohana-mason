@@ -8,9 +8,9 @@ return array
 		'channel'	=> 102,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'assets1.blah.fr',
-			'#2' => 'assets2.blah.fr',
-			'#3' => 'assets3.blah.fr'
+			'#1' => $_SERVER['HTTP_HOST'],
+			'#2' => $_SERVER['HTTP_HOST'],
+			'#3' => $_SERVER['HTTP_HOST']
 			)	
 		),
 	'blah.es' => array(
