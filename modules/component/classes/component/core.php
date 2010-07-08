@@ -319,6 +319,20 @@ class Component_Core
 		// one single file based on the combination of all components assets ?
 		// or one file per autohandler level ?
 		// or a combination of both ?
+		// IDEA : a component key, pack_assets, set the name of the file in which this component's
+		//        and all its 'childs' assets will be packed in. If set to false, will explicitly exclude
+		//		  this component assets from its parent packed file.
+		//        i.e. : /foo/bar/autohandler has the key 'main'.
+		//               Assets from /foo/autohandler, /autohandler and all components loaded from sub request 
+		//               will be packed in file 'main'
+		// How it works :
+		// assets files are queued from top to bottom (/, /foo, /foo/bar ...), in the order their comps are executed
+		// Before loading assets in the view, need to loop through Request::$instance->assets, find from each asset
+		// its component, get the pack_assets key; if false, leave the current asset in the list,
+		// if set, take the current asset content and concat it in the string name after the key value, then remove
+		// the current asset from the array.
+		// Then pack all strings into files
+
 	}
 	
 	/**
