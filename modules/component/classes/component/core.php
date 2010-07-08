@@ -268,6 +268,58 @@ class Component_Core
 		// Return compiled comp path
 		return $compiled_comp;
 	}
+
+	/**
+	 * Compile assets from given comp and returns an array of paths
+	 * 
+	 * @return	
+	 * @access	public
+	 * @static
+	 */
+	public static function assets($comp)
+	{
+		$context = Controller::get_context($comp);
+		
+		// Work with controller's entities only
+		$entities = Kohana::$tree['comps'][$context['path']][$context['directory']][$context['name']];
+		
+		// Component's path
+		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
+
+		// Retrieve scripts and stylesheets for this specific component
+		$assets = array($context['assets_cache_key'] => array());
+		
+		// Find which CDN to use
+		$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
+		
+		// Loop trough assets type
+		foreach(array('scripts', 'stylesheets') as $type)
+		{
+			if(array_key_exists($type, $entities))
+			{
+				// Make sure files are sorted in the right order
+				ksort($entities[$type]);
+				foreach($entities[$type] as $entity)
+				{
+					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
+						'host' => Request::$instance->cdn[$cdn_key],
+						'path' => $path,
+						'name' => $entity['name'],
+						'cache_id' => $entity['cache_id']
+						);
+				}
+			}
+		}
+		
+		return $assets;
+		// If non-dev env., pack assets in one single file named after the assets array md5ed
+		// Each comp would then have a single file, compressed.
+		// One top level caching should be then done
+		// Need to think about what would be best suited for performance :
+		// one single file based on the combination of all components assets ?
+		// or one file per autohandler level ?
+		// or a combination of both ?
+	}
 	
 	/**
 	 * Build the components tree by listing by scanning path defined in config

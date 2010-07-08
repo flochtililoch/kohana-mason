@@ -59,41 +59,11 @@ class Component_Controller extends Kohana_Controller
 				// If the combination of assets for this type of execution has not been cached yet
 				if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
 				{
-					// Retrieve scripts and stylesheets for this specific component
-					$assets = array($comp::$_assets_cache_key => array());
+					// Load assets for this specific component
+					$assets = Component::assets($comp);
 					
-					// Find which CDN to use
-					$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
-					
-					// Loop trough assets type
-					foreach(array('scripts', 'stylesheets') as $type)
-					{
-						if(array_key_exists($type, $entities))
-						{
-							// Make sure files are sorted in the right order
-							ksort($entities[$type]);
-							foreach($entities[$type] as $entity)
-							{
-								$assets[$comp::$_assets_cache_key][$type][$path.'/'.$type.'/'.$entity['name']] = array(
-									'host' => Request::$instance->cdn[$cdn_key],
-									'path' => $path,
-									'name' => $entity['name'],
-									'cache_id' => $entity['cache_id']
-									);
-							}
-						}
-					}
-
 					if(Kohana::$caching === TRUE)
-					{
-						// If non-dev env., pack assets in one single file named after the assets array md5ed
-						// Each comp would then have a single file, compressed.
-						// One top level caching should be then done
-						// Need to think about what would be best suited for performance :
-						// one single file based on the combination of all components assets ?
-						// or one file per autohandler level ?
-						// or a combination of both ?
-						
+					{	
 						// Assets cache never expire
 						Kohana::cache('assets_'.$path, $assets, 0);
 					}
@@ -122,6 +92,23 @@ class Component_Controller extends Kohana_Controller
 	public function comp($uri)
 	{
 		return Request::factory($uri)->execute()->response;
+	}
+	
+	/**
+	 * Return protected access variables
+	 * that defines the context of given comp
+	 *
+	 * @return	Array of properties
+	 * @access	public
+	 */
+	public static function get_context($comp)
+	{
+		return array(
+			'path'				=> $comp::$_path,
+			'directory'			=> $comp::$_directory,
+			'name'				=> $comp::$_name,
+			'assets_cache_key'	=> $comp::$_assets_cache_key
+			);
 	}
 	
 }	// End Component_Controller
