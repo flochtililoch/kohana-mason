@@ -4,6 +4,6 @@
 		]]>
 	</php>
 	<process>
-		<key name="clock">date('H:i:s')</key>
+		<key name="clock">date('H:i')</key>
 	</process>
 </comp>
