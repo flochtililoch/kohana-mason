@@ -3,11 +3,11 @@
     	/autohandler.xml
     	<div tal:replace="structure after"/>
     </div>
-	<script type="text/javascript" tal:repeat="script request/assets/scripts" tal:attributes="src string:http://${script/host}/assets/${script/path}/scripts/${script/name}.js"/>
+	<script tal:replace="structure comp: /scripts"/>
 </tal:block>
 <tal:block metal:fill-slot="head">
 	<title i18n:translate="">Hello World!</title>
-	<link type="text/css" tal:repeat="stylesheet request/assets/stylesheets" tal:attributes="src string:http://${stylesheet/host}/assets/${stylesheet/path}/stylesheets/${stylesheet/name}.css"/>
+	<link tal:replace="structure comp: /stylesheets"/>
 </tal:block>
 <html xmlns:i18n="http://xml.zope.org/namespaces/i18n" xmlns:tal="http://xml.zope.org/namespaces/tal">
     <head metal:define-slot="head"/>

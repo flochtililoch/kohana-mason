@@ -303,8 +303,7 @@ class Component_Core
 				{
 					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 						'host' => Request::$instance->cdn[$cdn_key],
-						'path' => $path,
-						'name' => $entity['name'],
+						'file' => $path.'/'.$type.'/'.$entity['name'],
 						'cache_id' => $entity['cache_id']
 						);
 				}
