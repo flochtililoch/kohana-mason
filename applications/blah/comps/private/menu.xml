@@ -1,0 +1,15 @@
+<comp>
+	<php>
+		<![CDATA[
+		$items = array(
+			'Home'			=> '/',
+			'My Account'	=> '/my',
+			'Products'		=> '/products',
+			'About'			=> '/about'
+			);
+		]]>
+	</php>
+	<process>
+		<key name="items">$items</key>
+	</process>
+</comp>

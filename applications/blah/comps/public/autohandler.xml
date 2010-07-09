@@ -1,6 +1,5 @@
 <comp>
 	<attr>
-		<key name="my_attr" visibility="private">'inherited from autohandler'</key>
 		<key name="logged_in">NULL</key>
 	</attr>
 	<php>

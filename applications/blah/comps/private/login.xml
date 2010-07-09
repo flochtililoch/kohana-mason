@@ -1,14 +1,5 @@
 <comp>
-	<attr>
-		<key name="cdn" visibility="public static">'#2'</key>
-		<key name="layout">'none'</key>
-		<key name="do_not_show_404">1</key>
-	</attr>
-	<php>
-		<![CDATA[
-		]]>
-	</php>
 	<process>
-		<key name="uri">$_SERVER['PATH_INFO']</key>
+		<key name="uri">array_key_exists('PATH_INFO', $_SERVER) ? $_SERVER['PATH_INFO'] : ''</key>
 	</process>
 </comp>

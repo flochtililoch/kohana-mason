@@ -1,0 +1,9 @@
+<comp>
+	<php>
+		<![CDATA[
+		]]>
+	</php>
+	<process>
+		<key name="clock">date('H:i:s')</key>
+	</process>
+</comp>

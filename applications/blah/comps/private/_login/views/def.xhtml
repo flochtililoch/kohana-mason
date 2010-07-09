@@ -3,19 +3,25 @@
 	<a tal:attributes="href base_uri:logout" i18n:translate="">Sign off</a>
 </p>
 <div tal:condition="not: logged_in" tal:omit-tag="">
-	<p tal:condition="login_failed | FALSE" i18n:translate="">Login / password incorrect</p>
-	<form name="login" method="post" tal:attributes="action uri;">
+	<form name="login" method="post" tal:attributes="action uri;" id="login">
 		<fieldset>
 			<legend i18n:translate="">Login</legend>
-			<label for="username" i18n:translate="">Username :</label>
-			<input id="username" name="username" type="text"/>
-			<label for="password" i18n:translate="">Password :</label>
-			<input id="password" name="password" type="password"/>
-			<label for="remember_me" i18n:translate="">Remember me</label>
-			<input id="remember_me" name="remember_me" type="checkbox"/>
-			<input name="action" type="hidden" value="login"/>
-			<input type="submit" name="signin" value="signin"/>
+			<p class="clearfix">
+				<label for="username" i18n:translate="">Username :</label>
+				<input id="username" name="username" type="text"/>
+			</p>
+			<p class="clearfix">
+				<label for="password" i18n:translate="">Password :</label>
+				<input id="password" name="password" type="password"/>
+			</p>
+			<p class="clearfix">
+				<label for="remember_me" i18n:translate="">Remember me</label>
+				<input id="remember_me" name="remember_me" type="checkbox"/>
+				<input name="action" type="hidden" value="login"/>
+				<input type="submit" name="signin" value="signin" id="signin"/>
+			</p>
+			<p class="register">Not yet a member? <a href="/register" i18n:translate="" tal:attributes="href uri:/register">Register</a></p>
 		</fieldset>
+		<p tal:condition="login_failed | FALSE" i18n:translate="" class="error">Login / password incorrect</p>
 	</form>
-	<p>Not yet a member? <a href="/register" i18n:translate="" tal:attributes="href uri:/register">Register</a></p>
 </div>

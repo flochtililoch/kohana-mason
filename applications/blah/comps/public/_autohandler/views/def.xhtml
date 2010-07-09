@@ -1,7 +1,8 @@
 <tal:block metal:fill-slot="body">
-	<div style="border:1px solid lightblue; padding:10px;">
-    	/autohandler.xml
+	<div id="wrapper">
+		<div tal:replace="structure comp: /header"/>
     	<div tal:replace="structure after"/>
+		<div tal:replace="structure comp: /footer"/>
     </div>
 	<script tal:replace="structure comp: /scripts"/>
 </tal:block>
