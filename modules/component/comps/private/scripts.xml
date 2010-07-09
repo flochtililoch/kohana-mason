@@ -1,0 +1,5 @@
+<comp>
+	<process>
+		<key name="scripts">Request::$instance->assets['scripts']</key>
+	</process>
+</comp>

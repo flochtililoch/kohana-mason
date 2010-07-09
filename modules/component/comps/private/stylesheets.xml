@@ -1,0 +1,5 @@
+<comp>
+	<process>
+		<key name="stylesheets">Request::$instance->assets['stylesheets']</key>
+	</process>
+</comp>
