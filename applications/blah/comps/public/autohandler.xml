@@ -23,7 +23,7 @@
 			}
 		}
 		// Logging out ?
-		else if(in_array('logout', $this->request->param()))
+		else if(count($this->request->param()) && in_array(I18n::instance()->uri('logout'), $this->request->param()))
 		{
 			Auth::instance()->logout();
 			
