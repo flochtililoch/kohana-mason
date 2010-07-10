@@ -80,6 +80,12 @@ class Tal_Core extends PHPTAL
 		
 		// Pass the translator object to the template manager
 		$this->setTranslator(I18n::instance());
+		
+		// Enable compression for non dev env
+		if(Kohana::$environment !== Kohana::DEVELOPMENT)
+		{
+			$this->addPreFilter(new PHPTAL_PreFilter_Compress);
+		}
 	}
 		
 	/**
