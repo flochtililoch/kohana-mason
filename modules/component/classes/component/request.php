@@ -99,7 +99,7 @@ class Component_Request extends Kohana_Request
 				unset($params['controller'], $params['action'], $params['directory']);
 
 				// Store extra params as array
-				$params = array_key_exists('params', $params) ? explode('/',$params["params"]) : $params;
+				$params = array_key_exists('params', $params) ? explode('/',$params['params']) : $params;
 				
 				// Params cannot be changed once matched
 				$this->_params = $params;
