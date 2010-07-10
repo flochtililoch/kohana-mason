@@ -47,7 +47,7 @@ class Tal_Context extends PHPTAL_Context
 			}
 
 			// If nothing's found yet, look in parent's request controller
-			$controller = $controller::instance()->request->parent;			
+			$controller = $controller::instance()->request->parent;
 		}
 		
 		// Fall back to PHPTAL default context getter

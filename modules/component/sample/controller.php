@@ -64,6 +64,13 @@ class %2$s extends %3$s
 	protected static $_assets_cache_key = '';
 	
 	/**
+	 * Component's assets pushed flag
+	 *
+	 * @access	protected
+	 */
+	protected static $_assets_pushed = FALSE;
+	
+	/**
 	 * Controller default action method
 	 *
 	 * @return	void

@@ -55,7 +55,7 @@ class Component_Controller extends Kohana_Controller
 						$entities['views']['cache_id']
 						);
 				}
-				
+
 				// If the combination of assets for this type of execution has not been cached yet
 				if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
 				{
@@ -70,7 +70,13 @@ class Component_Controller extends Kohana_Controller
 				}
 
 				// Merge component's assets with main request current assets
-				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets[$comp::$_assets_cache_key]);
+				if($comp::$_assets_pushed !== TRUE)
+				{
+					Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets[$comp::$_assets_cache_key]);
+					
+					// Flag assets as pushed in the stack
+					$comp::$_assets_pushed = TRUE;
+				}
 
 				// Return view result
     			return $this->request;
