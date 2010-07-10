@@ -2,6 +2,11 @@
 {
 	float:left;
 }
+#header .menu
+{
+	height:166px;
+	width:179px;
+}
 #clock
 {
 	float:right;

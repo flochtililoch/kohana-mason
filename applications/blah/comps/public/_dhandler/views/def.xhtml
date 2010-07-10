@@ -1,10 +1,6 @@
 <h1>Welcome! This is the homepage</h1>
 <p>Take a look at our special offers</p>
 <ul class="specialoffers clearfix">
-	<li tal:repeat="offer specialoffers">
-		<h2><a href="/products/product" tal:content="offer/name" tal:attributes="href string:products/${offer/slug}">Product name</a></h2>
-		<p tal:content="offer/desc">Product's description</p>
-		<big><span tal:replace="offer/price">15</span> €</big>
-	</li>
+	<li tal:repeat="offer specialoffers" tal:content="structure comp: /product"/>
 </ul>
 <p>and of course all best prices on the internet on the rest of <a href="/products" title="See a range of our amazing products">our products</a></p>

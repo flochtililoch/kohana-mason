@@ -1,11 +1,9 @@
 .menu
 {
 	background:lightBlue;
-	height:166px;
 	list-style:none;
 	margin:0;
 	padding:0;
-	width:179px;
 }
 .menu li
 {

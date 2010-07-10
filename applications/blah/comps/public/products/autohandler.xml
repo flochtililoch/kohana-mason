@@ -1,0 +1,59 @@
+<comp>
+	<php>
+		<![CDATA[
+		
+		$this->products = array(
+			'product-1' 		=> array(
+				'name'			=> 'Product1',
+				'desc'			=> 'Product1\'s description here...',
+				'price'			=> '15'
+				),
+			'product-2' 		=> array(
+				'name'			=> 'Product2',
+				'desc'			=> 'Product2\'s description here...',
+				'price'			=> '20'
+				),
+			'product-3' 		=> array(
+				'name'			=> 'Product3',
+				'desc'			=> 'Product3\'s description here...',
+				'price'			=> '12'
+				),
+			'product-4' 		=> array(
+				'name'			=> 'Product4',
+				'desc'			=> 'Product4\'s description here...',
+				'price'			=> '25'
+				),
+			'product-5' 		=> array(
+				'name'			=> 'Product5',
+				'desc'			=> 'Product5\'s description here...',
+				'price'			=> '15'
+				),
+			'product-6' 		=> array(
+				'name'			=> 'Product6',
+				'desc'			=> 'Product6\'s description here...',
+				'price'			=> '20'
+				),
+			'product-7' 		=> array(
+				'name'			=> 'Product7',
+				'desc'			=> 'Product7\'s description here...',
+				'price'			=> '12'
+				),
+			'product-8' 		=> array(
+				'name'			=> 'Product8',
+				'desc'			=> 'Product8\'s description here...',
+				'price'			=> '25'
+				)
+			);
+			
+		$params = $this->request->param();
+		$product = array_shift($params);
+		if($product && !array_key_exists($product, $this->products))
+		{
+			die('404');
+		}
+		
+		
+		]]>
+	</php>
+	<process/>
+</comp>

@@ -1,6 +1,0 @@
-<comp>
-	<attr>
-		<key name="my_attr">'inherited from foo/autohandler'</key>
-	</attr>
-	<process/>
-</comp>
