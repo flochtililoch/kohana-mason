@@ -1,3 +1,10 @@
 <comp>
-	<process/>
+	<php>
+		<![CDATA[
+			$product = array_shift($this->request->args);
+		]]>
+	</php>
+	<process>
+		<key name="product">$product</key>
+	</process>
 </comp>

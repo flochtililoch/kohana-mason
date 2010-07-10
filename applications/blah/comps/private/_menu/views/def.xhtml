@@ -1,5 +1,6 @@
 <ul class="menu clearfix">
-	<li tal:repeat="item items">
-		<a tal:attributes="href item" tal:content="repeat/item/key">Menu Item</a>
-	</li>
+	<li><a href="/" i18n:translate="">Home</a></li>
+	<li><a tal:attributes="href uri:/my;" i18n:translate="">My account</a></li>
+	<li><a tal:attributes="href uri:/products;" i18n:translate="">Products</a></li>
+	<li><a tal:attributes="href uri:/about;" i18n:translate="">About</a></li>		
 </ul>
