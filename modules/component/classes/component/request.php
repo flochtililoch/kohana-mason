@@ -15,6 +15,13 @@ class Component_Request extends Kohana_Request
 	 * @access	public
 	 */
     public $parent = NULL;
+
+	/**
+     * Component's input params
+     *
+	 * @access	public
+	 */
+	public $params = NULL;
 	
 	/**
      * Request's assets container
@@ -35,13 +42,16 @@ class Component_Request extends Kohana_Request
 	 * @access	public
 	 * @static
 	 */
-	public static function factory($uri, $controller = NULL)
+	public static function factory($uri, $controller = NULL, $params = NULL)
 	{
 		// Create new request instance
 		$r = new Request($uri, Kohana::$tree['routes']['internal']);
 		
 		// Store the request creator controller class name
 		$r->parent = $controller::instance()->base_comp();
+		
+		// Store params
+		$r->params = $params;
 		
 		// Returns request instance
 		return $r;

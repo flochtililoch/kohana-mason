@@ -71,6 +71,21 @@ class %2$s extends %3$s
 	protected static $_assets_pushed = FALSE;
 	
 	/**
+	 * Controller before action method
+	 *
+	 * @return	void
+	 * @access	public
+	 */
+	public function before()
+	{
+		// Store request's parametres for later use in the view
+		if(is_array($this->request->params))
+		{
+			self::$_process = $this->request->params + self::$_process;
+		}
+	}
+	
+	/**
 	 * Controller default action method
 	 *
 	 * @return	void

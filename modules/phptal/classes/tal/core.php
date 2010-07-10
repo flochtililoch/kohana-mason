@@ -144,9 +144,39 @@ class Tal_Core extends PHPTAL
 /**
  * Perform a sub-request
  */
-function phptal_tales_comp($src, $nothrow)
+function phptal_tales_comp($paths, $nothrow)
 {
-	return 'Request::factory(\''.trim($src).'\', $ctx->controller)->execute()->response';
+	// Convert paths to array
+	$paths = explode(' ', trim($paths));
+	
+	// First string in paths is a comp
+	$comp = array_shift($paths);
+	
+	if(count($paths))
+	{
+		$params = array();
+		foreach($paths as $path)
+		{
+			$segments = explode('/', $path);
+			$obj = '$ctx->'.array_shift($segments);
+			if(count($segments))
+			{
+				$params[] = '\''.$segments[count($segments)-1].'\' => $ctx->path('.$obj.', \''.implode('/', $segments).'\')';
+			}
+			// If there's just one object path, no needs to run path() on it
+			else
+			{
+				$params[] ='\''.$path.'\' => '.$obj;
+			}
+		}
+		$params = ', array('.implode(', ', $params).')';	
+	}
+	else
+	{
+		$params = '';
+	}
+
+	return 'Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response';
 }
 
 /**
