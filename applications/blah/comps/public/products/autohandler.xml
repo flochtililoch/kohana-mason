@@ -3,65 +3,66 @@
 		<![CDATA[
 		
 		$this->products = array(
-			'product-1' 		=> array(
+			'product-name-one' 		=> array(
 				'name'			=> 'Product1',
 				'desc'			=> 'Product1\'s description here...',
 				'price'			=> '15',
-				'slug'			=> 'product-name-one'
+				'uri'			=> I18n::instance()->uri('/products/product-name-one')
 				),
-			'product-2' 		=> array(
+			'product-name-two' 		=> array(
 				'name'			=> 'Product2',
 				'desc'			=> 'Product2\'s description here...',
 				'price'			=> '20',
-				'slug'			=> 'product-name-two'
+				'uri'			=> I18n::instance()->uri('/products/product-name-two')
 				),
-			'product-3' 		=> array(
+			'product-name-three' 		=> array(
 				'name'			=> 'Product3',
 				'desc'			=> 'Product3\'s description here...',
 				'price'			=> '12',
-				'slug'			=> 'product-name-three'
+				'uri'			=> I18n::instance()->uri('/products/product-name-three')
 				),
-			'product-4' 		=> array(
+			'product-name-four' 		=> array(
 				'name'			=> 'Product4',
 				'desc'			=> 'Product4\'s description here...',
 				'price'			=> '25',
-				'slug'			=> 'product-name-four'
+				'uri'			=> I18n::instance()->uri('/products/product-name-four')
 				),
-			'product-5' 		=> array(
+			'product-name-five' 		=> array(
 				'name'			=> 'Product5',
 				'desc'			=> 'Product5\'s description here...',
 				'price'			=> '15',
-				'slug'			=> 'product-name-five'
+				'uri'			=> I18n::instance()->uri('/products/product-name-five')
 				),
-			'product-6' 		=> array(
+			'product-name-six' 		=> array(
 				'name'			=> 'Product6',
 				'desc'			=> 'Product6\'s description here...',
 				'price'			=> '20',
-				'slug'			=> 'product-name-six'
+				'uri'			=> I18n::instance()->uri('/products/product-name-six')
 				),
-			'product-7' 		=> array(
+			'product-name-seven' 		=> array(
 				'name'			=> 'Product7',
 				'desc'			=> 'Product7\'s description here...',
 				'price'			=> '12',
-				'slug'			=> 'product-name-seven'
+				'uri'			=> I18n::instance()->uri('/products/product-name-seven')
 				),
-			'product-8' 		=> array(
+			'product-name-eight' 		=> array(
 				'name'			=> 'Product8',
 				'desc'			=> 'Product8\'s description here...',
 				'price'			=> '25',
-				'slug'			=> 'product-name-eight'
+				'uri'			=> I18n::instance()->uri('/products/product-name-eight')
 				)
 			);
 			
-		$params = $this->request->param();
-		$product = array_shift($params);
-		if($product && !array_key_exists($product, $this->products))
-		{
-			die('404');
-		}
-		
-		
+			$key = $this->request->param();
+			$product = FALSE;
+			
+			if(array_key_exists(0, $key) && array_key_exists($key[0], $this->products))
+			{
+				$product = $this->products[$this->request->shift_param()];
+			}
 		]]>
 	</php>
-	<process/>
+	<process>
+		<key name="product">$product</key>
+	</process>
 </comp>
