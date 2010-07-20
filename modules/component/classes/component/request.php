@@ -124,5 +124,16 @@ class Component_Request extends Kohana_Request
 		throw new Kohana_Request_Exception('Unable to find a route to match the URI: :uri',
 			array(':uri' => $uri));
 	}
+	
+	/**
+	 * Retrieves the next uri param and remove it from the stack
+	 *
+	 * @return  string
+	 */
+	public function shift_param()
+	{
+		// Return the full array
+		return array_shift($this->_params);
+	}
 
 }	// End Component_Request
