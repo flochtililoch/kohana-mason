@@ -331,8 +331,20 @@ class Kohana extends Kohana_Core
 			// Store CDN information into the request
 			$request->cdn = $application['cdn'];
 			
-			// Output the result
-			echo $request->execute()->send_headers();
+			// Process the whole request
+			$response = (string) $request->execute();
+
+			// If params have not been shifted ("used"), URI is wrong -> 404
+			if(count($request->param()))
+			{
+				$request->status = 404;
+			}
+
+			// Send correct header
+			$request->send_headers();
+			
+			// Display rendered page
+			echo $response;
 
 			// Echo profile results
 			if($settings['profile'] === TRUE)
@@ -486,7 +498,7 @@ class Kohana extends Kohana_Core
 			{
 				$cmd = 'rd "%s" /s /q';
 			}
-			system(sprintf($cmd, CACHEPATH.'classes/controller'));
+			//system(sprintf($cmd, CACHEPATH.'classes/controller'));
 			system(sprintf($cmd, CACHEPATH.'i18n'));
 			system(sprintf($cmd, CACHEPATH.'kohana'));
 			system(sprintf($cmd, CACHEPATH.'views'));
