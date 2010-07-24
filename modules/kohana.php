@@ -334,8 +334,8 @@ class Kohana extends Kohana_Core
 			// Process the whole request
 			$response = (string) $request->execute();
 
-			// If params have not been shifted ("used"), URI is wrong -> 404
-			if(count($request->param()))
+			// If there is still unused params, URI is wrong -> 404
+			if(strlen($request->shift_param()))
 			{
 				$request->status = 404;
 			}
