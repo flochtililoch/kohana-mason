@@ -182,36 +182,15 @@ class Component_Core
 
 		// Load xml component
 		$xml = simplexml_load_file($xml_comp);
-
-		// Set defaults attributes
-		$attributes = array();
 		
-		// Compile attributes
-		foreach($xml->attr as $keys)
+		// Find inheritance : if a parent autohandler exists, then class inherits from its parent
+		$extends = 'Controller';
+		if(Kohana::$tree['comps'][$path][$directory][$controller]['inherit'] !== NULL)
 		{
-			foreach($keys->key as $key)
-			{
-				// Retrieve all XML tags within <attr/>
-				$tag_attributes = array();
-				foreach($key->attributes() as $name => $value)
-				{
-					$tag_attributes[$name] = $value->__toString();
-				}
-				// If the current tag contains a 'name' attribute
-				if(array_key_exists('name', $tag_attributes))
-				{
-					$attributes[$tag_attributes['name']] = sprintf(
-						'%1$s $%2$s = %3$s;',
-						array_key_exists('visibility', $tag_attributes) ? 
-							$tag_attributes['visibility'] :
-							(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
-						$tag_attributes['name'],
-						$key[0]
-						);
-				}
-			}
+			// Extends from Controller by default for orphans comps
+			$extends = Kohana::$tree['comps'][$path][$directory][$controller]['inherit'];
 		}
-
+		
 		// Compile output variables
 		$view_engine = Kohana::config('view.engine');
 		$process = array();
@@ -240,12 +219,43 @@ class Component_Core
 			}
 		}
 
-		// Find inheritance : if a parent autohandler exists, then class inherits from its parent
-		$extends = 'Controller';
-		if(Kohana::$tree['comps'][$path][$directory][$controller]['inherit'] !== NULL)
+		// Set defaults attributes
+		$attributes = array(
+			'_path' 			=> 'protected static $_path = \''.$path.'\';',													// Component origin in tree
+			'_directory'		=> 'protected static $_directory = \''.addslashes($directory).'\';',							// Component path
+			'_name'				=> 'protected static $_name = \''.$controller.'\';',											// Component name
+			'_view_engine'		=> 'protected static $_view_engine = '.($view_engine !== NULL ? $view_engine : 'NULL').';',		// View type
+			'_process'			=> 'protected static $_process = array();',														// View variables container
+			'_instance'			=> 'protected static $_instance = NULL;',														// Controller instance container
+			'_wrapping_chain' 	=> 'protected static $_wrapping_chain = NULL;',													// Wrapping chain container
+			'_assets_cache_key'	=> 'protected static $_assets_cache_key = \'\';',												// Component's assets cache key
+			'_assets_pushed' 	=> 'protected static $_assets_pushed = FALSE;'													// Component's assets pushed flag
+		);
+		
+		// Compile attributes
+		foreach($xml->attr as $keys)
 		{
-			// Extends from Controller by default for orphans comps
-			$extends = Kohana::$tree['comps'][$path][$directory][$controller]['inherit'];
+			foreach($keys->key as $key)
+			{
+				// Retrieve all XML tags within <attr/>
+				$tag_attributes = array();
+				foreach($key->attributes() as $name => $value)
+				{
+					$tag_attributes[$name] = $value->__toString();
+				}
+				// If the current tag contains a 'name' attribute
+				if(array_key_exists('name', $tag_attributes))
+				{
+					$attributes[$tag_attributes['name']] = sprintf(
+						'%1$s $%2$s = %3$s;',
+						array_key_exists('visibility', $tag_attributes) ? 
+							$tag_attributes['visibility'] :
+							(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
+						$tag_attributes['name'],
+						$key[0]
+						);
+				}
+			}
 		}
 
 		// Write php file
@@ -257,10 +267,6 @@ class Component_Core
 				$class,																				// class name
 				$extends,																			// extended from
 				implode($attributes, chr(13).chr(9)),												// attributes
-				$path,																				// component origin
-				addslashes($directory),																// component path
-				$controller,																		// component name
-				$view_engine !== NULL ? $view_engine : 'NULL',										// view rendering engine
 				trim($xml->php),																	// php code
 				implode($process, chr(13).chr(9).chr(9))					                        // view variables
 				));

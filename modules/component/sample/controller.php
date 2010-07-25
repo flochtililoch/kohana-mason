@@ -10,67 +10,6 @@ class %2$s extends %3$s
 	// --------------
 	
 	/**
-	 * Component origin in tree
-	 *
-	 * @access	protected
-	 */
-	protected static $_path = '%5$s';
-	
-	/**
-	 * Component path
-	 *
-	 * @access	protected
-	 */
-	protected static $_directory = '%6$s';
-	
-	/**
-	 * Component name
-	 *
-	 * @access	protected
-	 */
-	protected static $_name = '%7$s';
-    
-	/**
-	 * View type
-	 *
-	 * @access	protected
-	 */
-	protected static $_view_engine = %8$s;
-	
-	/**
-	 * View variables container
-	 */
-	protected static $_process = array();
-	
-	/**
-	 * Controller instance container
-	 *
-	 * @access	protected
-	 */
-	protected static $_instance = NULL;
-	
-	/**
-	 * Wrapping chain container
-	 *
-	 * @access	protected
-	 */
-	protected static $_wrapping_chain = NULL;
-	
-	/**
-	 * Component's assets cache key
-	 *
-	 * @access	protected
-	 */
-	protected static $_assets_cache_key = '';
-	
-	/**
-	 * Component's assets pushed flag
-	 *
-	 * @access	protected
-	 */
-	protected static $_assets_pushed = FALSE;
-	
-	/**
 	 * Controller default action method
 	 *
 	 * @return	void
@@ -81,11 +20,11 @@ class %2$s extends %3$s
 		parent::action_index();
 		
 		// <php/> section
-		%9$s
+		%5$s
 		// -------------
 	
 		// <process/> section
-		%10$s
+		%6$s
 		// -----------------
 		
 		// Store current comp name in base component wrapping_chain method
