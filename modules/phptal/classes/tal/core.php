@@ -198,7 +198,7 @@ function phptal_tales_uri($src, $nothrow)
  */
 function phptal_tales_base_uri($src, $nothrow)
 {
-	return '$_SERVER[\'REQUEST_URI\'].\'/'.I18n::instance()->uri($src).'\'';
+	return '$_SERVER[\'REQUEST_URI\'].($_SERVER[\'REQUEST_URI\'] !== \'/\'? \'/\':\'\').\''.I18n::instance()->uri($src).'\'';
 }
 
 /**
