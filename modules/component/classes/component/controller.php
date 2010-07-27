@@ -63,8 +63,11 @@ class Component_Controller extends Kohana_Controller
 			// If comp has attached views
 			if(array_key_exists('views', Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]))
 			{
+				// if $_view_file has been defined in comp, look to the file in user's views, otherwise in default views
+				$view_type = $comp::$_view_file === 0 ? '' : 'user';
+				
 				// Work with controller's views only
-				$views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views'];
+				$views = Kohana::$tree['comps'][$comp::$_path][$comp::$_directory][$comp::$_name]['views'][$view_type][$comp::$_view_file];
 				
 				// Find which class to use to load the view
 				$view_engine = $comp::$_view_engine ? $comp::$_view_engine : Kohana::config('view.engine');
@@ -111,6 +114,7 @@ class Component_Controller extends Kohana_Controller
 			'path'				=> $comp::$_path,
 			'directory'			=> $comp::$_directory,
 			'name'				=> $comp::$_name,
+			'view_file'			=> $comp::$_view_file,
 			'assets_cache_key'	=> $comp::$_assets_cache_key
 			);
 	}

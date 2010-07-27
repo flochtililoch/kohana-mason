@@ -224,6 +224,7 @@ class Component_Core
 			'_path' 			=> 'protected static $_path = \''.$path.'\';',													// Component origin in tree
 			'_directory'		=> 'protected static $_directory = \''.addslashes($directory).'\';',							// Component path
 			'_name'				=> 'protected static $_name = \''.$controller.'\';',											// Component name
+			'_view_file'		=> 'protected static $_view_file = 0;',														// Component view file name
 			'_view_engine'		=> 'protected static $_view_engine = '.($view_engine !== NULL ? $view_engine : 'NULL').';',		// View type
 			'_process'			=> 'protected static $_process = array();',														// View variables container
 			'_instance'			=> 'protected static $_instance = NULL;',														// Controller instance container
@@ -305,7 +306,7 @@ class Component_Core
 			{
 				// Make sure files are sorted in the right order
 				ksort($entities[$type]);
-				foreach($entities[$type] as $entity)
+				foreach($entities[$type][''] as $entity)
 				{
 					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 						'host' => Request::$instance->cdn[$cdn_key],
@@ -358,7 +359,7 @@ class Component_Core
 			Component::$_tree['routes']['external'] = array();
 
 		    // Loop through comps tree 
-		    foreach(array_merge(Component::$_internal_trees, Component::$_external_trees) as $dir)
+		    foreach(array_unique(array_merge(Component::$_internal_trees, Component::$_external_trees)) as $dir)
 		    {
 		        // Scan dir for components
 		        Component::_scan_files($dir);
@@ -440,6 +441,7 @@ class Component_Core
 			{
 				$directory = $comp[1];
 				$controller = $comp[2];
+				
 				 // Autohandlers are not routable
 				if($controller !== Component::AUTOHANDLER)
 				{
@@ -457,33 +459,57 @@ class Component_Core
 				Component::$_tree['cache_ids']['controller_'.str_replace('/', '_', $tree.'/'.$directory.$controller)] = filemtime($file);
 			}
 			
-			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/('.implode('|', $allowed_entities).')?\.?('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $view))
+			// All other files, if they match with declared entity types
+			if(preg_match('/^'.preg_quote($path, '/').'\/(.*\/)?_([a-zA-Z0-9]*)\/('.implode('|', Component::$_entities_types).')\/(.*)?\.('.implode('|', array_keys(Component::$_entities_types)).')$/', $entry, $entity))
 			{
-				$directory = $view[1];
-			    $controller = $view[2];
-				$entity_type = $view[3];
-				$entity_file = $view[4];
+				$directory = $entity[1];
+			    $controller = $entity[2];
+				$entity_type = $entity[3];
+				$entity_file = $entity[4];
+			
+				// All non-defaults resources are retrieved and indexed using their file name as key under 'user' array
+				$entity_path = 'user';
+				$entity_key = $entity_file;
+				$entity_value = array('name' => $entity_file, 'cache_id' => filemtime($file));
 				
-				// Apply a specific rule for views :
-				// Each controller can just have one view associated.
-				// Here we're looking for the highest ranked filename's in $allowed_entities.
-				// Others entities are all retrieved and ordered by rank
-				switch($entity_type)
+				// Entity is a 'default' resource?
+				if(preg_match('/^('.implode('|', $allowed_entities).')$/', $entity_file))
 				{
-					case 'views':
-						$current = array_key_exists($entity_type, Component::$_tree['comps'][$tree][$directory][$controller]) ? Component::$_tree['comps'][$tree][$directory][$controller][$entity_type] : array('name' => NULL);
-						if($current['name'] === NULL || array_search($current['name'], $allowed_entities) > array_search($entity_file, $allowed_entities))
+					// Entities other than view are stored in reversed order
+					$entity_key = array_search($entity_file, ($entity_type === 'views' ? $allowed_entities : array_reverse($allowed_entities)));
+					$entity_path = '';
+				}
+				
+				// Init storage container if not yet existing
+				if(!isset(Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$entity_path]))
+				{
+					Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$entity_path] = array();
+				}
+				
+				// And store the entity
+				Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$entity_path] += array($entity_key => $entity_value);;
+			}
+		}
+		
+		// Once all comps have been processed, go through default entities and reorder them
+		// DIRTY !!! could use array_walk + recursive function maybe?
+		foreach(Component::$_tree['comps'][$tree] as $directory => $controller)
+		{
+			foreach($controller as $name => $controller_data)
+			{
+				foreach($controller_data as $type => $entry)				
+				{
+					if(in_array($type, Component::$_entities_types))
+					{
+						foreach($entry as $entity_path => $entity)
 						{
-							Component::$_tree['comps'][$tree][$directory][$controller][$entity_type]['name'] = $entity_file;
-							Component::$_tree['comps'][$tree][$directory][$controller][$entity_type]['cache_id'] = filemtime($file);
+							if($entity_path === '')
+							{
+								ksort(Component::$_tree['comps'][$tree][$directory][$name][$type][$entity_path], SORT_NUMERIC);
+								Component::$_tree['comps'][$tree][$directory][$name][$type][$entity_path] = array_values(Component::$_tree['comps'][$tree][$directory][$name][$type][$entity_path]);
+							}
 						}
-						break;
-						
-					default:
-						$idx = array_search($entity_file, $allowed_entities);
-						Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$idx]['name'] = $entity_file;
-						Component::$_tree['comps'][$tree][$directory][$controller][$entity_type][$idx]['cache_id'] = filemtime($file);
-						break;
+					}
 				}
 			}
 		}
