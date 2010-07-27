@@ -19,20 +19,20 @@ return array
 		'channel'	=> 103,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'assets1.blah.es',
-			'#2' => 'assets2.blah.es',
-			'#3' => 'assets3.blah.es'
+			'#1' => $_SERVER['HTTP_HOST'],
+			'#2' => $_SERVER['HTTP_HOST'],
+			'#3' => $_SERVER['HTTP_HOST']
 			)
 		),
 	'blah.co.uk' => array(
 		'appname'	=> 'blah',
 		'locale'	=> 'en_GB',
-		'channel'	=> 3,
+		'channel'	=> 4,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'assets1.blah.co.uk',
-			'#2' => 'assets2.blah.co.uk',
-			'#3' => 'assets3.blah.co.uk'
+			'#1' => $_SERVER['HTTP_HOST'],
+			'#2' => $_SERVER['HTTP_HOST'],
+			'#3' => $_SERVER['HTTP_HOST']
 			)
 		)
 );
