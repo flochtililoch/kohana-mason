@@ -224,13 +224,14 @@ class Component_Core
 			'_path' 			=> 'protected static $_path = \''.$path.'\';',													// Component origin in tree
 			'_directory'		=> 'protected static $_directory = \''.addslashes($directory).'\';',							// Component path
 			'_name'				=> 'protected static $_name = \''.$controller.'\';',											// Component name
-			'_view_file'		=> 'protected static $_view_file = 0;',														// Component view file name
+			'_view_file'		=> 'protected static $_view_file = 0;',															// Component view file name
 			'_view_engine'		=> 'protected static $_view_engine = '.($view_engine !== NULL ? $view_engine : 'NULL').';',		// View type
 			'_process'			=> 'protected static $_process = array();',														// View variables container
 			'_instance'			=> 'protected static $_instance = NULL;',														// Controller instance container
 			'_wrapping_chain' 	=> 'protected static $_wrapping_chain = NULL;',													// Wrapping chain container
+			'_assets'			=> 'protected static $_assets = array();',														// Component's assets
 			'_assets_cache_key'	=> 'protected static $_assets_cache_key = \'\';',												// Component's assets cache key
-			'_assets_pushed' 	=> 'protected static $_assets_pushed = FALSE;'													// Component's assets pushed flag
+			'_assets_pushed' 	=> 'protected static $_assets_pushed = array();'												// Component's assets pushed flag
 		);
 		
 		// Compile attributes
@@ -306,7 +307,9 @@ class Component_Core
 			{
 				// Make sure files are sorted in the right order
 				ksort($entities[$type]);
-				foreach($entities[$type][''] as $entity)
+				
+				// Include user assets files beside default assets files
+				foreach((count($context['assets']) && array_key_exists('user', $entities[$type]) ? $entities[$type][''] + $entities[$type]['user'] : $entities[$type]['']) as $entity)
 				{
 					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 						'host' => Request::$instance->cdn[$cdn_key],
