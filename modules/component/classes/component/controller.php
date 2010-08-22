@@ -39,7 +39,7 @@ class Component_Controller extends Kohana_Controller
 			$path = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name;
 
 			// If the combination of assets for this type of execution has not been cached yet
-			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path)) )
+			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) )
 			{
 				// Load assets for this specific component
 				$assets = Component::assets($comp);
@@ -47,17 +47,17 @@ class Component_Controller extends Kohana_Controller
 				if(Kohana::$caching === TRUE)
 				{	
 					// Assets cache never expire
-					Kohana::cache('assets_'.$path, $assets, 0);
+					Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key, $assets, 0);
 				}
 			}
 
 			// Merge component's assets with main request current assets
-			if($comp::$_assets_pushed !== TRUE)
+			if(!in_array($comp::$_assets_cache_key, $comp::$_assets_pushed))
 			{
 				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets[$comp::$_assets_cache_key]);
 				
 				// Flag assets as pushed in the stack
-				$comp::$_assets_pushed = TRUE;
+				$comp::$_assets_pushed[] = $comp::$_assets_cache_key;
 			}
 
 			// If comp has attached views
@@ -115,6 +115,7 @@ class Component_Controller extends Kohana_Controller
 			'directory'			=> $comp::$_directory,
 			'name'				=> $comp::$_name,
 			'view_file'			=> $comp::$_view_file,
+			'assets'			=> $comp::$_assets,
 			'assets_cache_key'	=> $comp::$_assets_cache_key
 			);
 	}
