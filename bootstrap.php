@@ -12,8 +12,8 @@ define('EXT', '.php');
 
 // Define the absolute paths for configured directories
 define('DOCROOT', realpath(__DIR__).DIRECTORY_SEPARATOR);
-define('VENDORPATH', realpath(DOCROOT.'vendor').DIRECTORY_SEPARATOR);
-define('SYSPATH', realpath(VENDORPATH.'kohana').DIRECTORY_SEPARATOR);
+define('LIBPATH', realpath(DOCROOT.'lib').DIRECTORY_SEPARATOR);
+define('SYSPATH', realpath(LIBPATH.'kohana').DIRECTORY_SEPARATOR);
 define('MODPATH', realpath(DOCROOT.'modules').DIRECTORY_SEPARATOR);
 define('APPSPATH', realpath(DOCROOT.'applications').DIRECTORY_SEPARATOR);
 
