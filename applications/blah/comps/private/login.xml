@@ -1,4 +1,16 @@
 <comp>
+	<php>
+		<![CDATA[
+		
+		if(Controller_Public_Autohandler::instance()->logged_in)
+		{
+			$comp = __CLASS__;
+			$comp::$_assets_cache_key = 'logged_in';
+			array_push($comp::$_assets, 'logged_in', 'special');
+		}
+		
+		]]>
+	</php>
 	<process>
 		<key name="uri">array_key_exists('PATH_INFO', $_SERVER) ? $_SERVER['PATH_INFO'] : ''</key>
 	</process>
