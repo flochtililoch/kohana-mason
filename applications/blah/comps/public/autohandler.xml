@@ -1,5 +1,6 @@
 <comp>
 	<attr>
+		<key name="_assets">array('jquery')</key>
 		<key name="logged_in">NULL</key>
 	</attr>
 	<php>

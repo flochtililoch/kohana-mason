@@ -248,14 +248,23 @@ class Component_Core
 				// If the current tag contains a 'name' attribute
 				if(array_key_exists('name', $tag_attributes))
 				{
-					$attributes[$tag_attributes['name']] = sprintf(
-						'%1$s $%2$s = %3$s;',
-						array_key_exists('visibility', $tag_attributes) ? 
-							$tag_attributes['visibility'] :
-							(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
-						$tag_attributes['name'],
-						$key[0]
-						);
+					$visibility = array_key_exists('visibility', $tag_attributes) ? $tag_attributes['visibility'] : NULL;
+					
+					if(array_key_exists($tag_attributes['name'], $attributes) && $visibility === NULL)
+					{
+						$attributes[$tag_attributes['name']] = preg_replace('/(.* = )(.*)(;)/', '$1'.$key[0].'$3', $attributes[$tag_attributes['name']]);
+					}
+					else
+					{
+						$attributes[$tag_attributes['name']] = sprintf(
+							'%1$s $%2$s = %3$s;',
+							$visibility !== NULL ?
+								$visibility :
+								(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
+							$tag_attributes['name'],
+							$key[0]
+							);
+					}
 				}
 			}
 		}
