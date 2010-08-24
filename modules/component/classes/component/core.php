@@ -250,21 +250,21 @@ class Component_Core
 				{
 					$visibility = array_key_exists('visibility', $tag_attributes) ? $tag_attributes['visibility'] : NULL;
 					
+					// If we're trying to redefine a default attribute without specifying its visibility, use its default visibility
 					if(array_key_exists($tag_attributes['name'], $attributes) && $visibility === NULL)
 					{
-						$attributes[$tag_attributes['name']] = preg_replace('/(.* = )(.*)(;)/', '$1'.$key[0].'$3', $attributes[$tag_attributes['name']]);
+						preg_match('/^(.*) \$'.$tag_attributes['name'].' = .*;$/', $attributes[$tag_attributes['name']], $visibility);
+						$visibility = $visibility[1];
 					}
-					else
-					{
-						$attributes[$tag_attributes['name']] = sprintf(
-							'%1$s $%2$s = %3$s;',
-							$visibility !== NULL ?
-								$visibility :
-								(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
-							$tag_attributes['name'],
-							$key[0]
-							);
-					}
+
+					$attributes[$tag_attributes['name']] = sprintf(
+						'%1$s $%2$s = %3$s;',
+						$visibility !== NULL ?
+							$visibility :
+							(substr($tag_attributes['name'], 0, 1) === '_' ? 'protected' : 'public'),
+						$tag_attributes['name'],
+						$key[0]
+						);
 				}
 			}
 		}
@@ -317,8 +317,31 @@ class Component_Core
 				// Make sure files are sorted in the right order
 				ksort($entities[$type]);
 				
-				// Include user assets files beside default assets files
-				foreach((count($context['assets']) && array_key_exists('user', $entities[$type]) ? $entities[$type][''] + $entities[$type]['user'] : $entities[$type]['']) as $entity)
+				// If there's user defined entities and comp need to load some
+				$used_entities = array();
+				if(is_array($context['assets']) && count($context['assets']) && array_key_exists('user', $entities[$type]))
+				{
+					// User defined entities get priority over default behviour ones
+					$tmp_used_entities = array_intersect_key($entities[$type]['user'], array_flip($context['assets']));
+
+					// Sort used entities into user's order
+					foreach($context['assets'] as $asset)
+					{
+						if(!array_key_exists($asset, $tmp_used_entities))
+						{
+							throw new Kohana_Exception('Unable to find required asset: :asset',
+								array(':asset' => $asset));
+						}
+
+						$used_entities[$asset] = $tmp_used_entities[$asset];
+					}
+				}
+
+				// Queue default behaviour entities
+				$used_entities += $entities[$type][''];
+
+				// Include assets files
+				foreach($used_entities as $entity)
 				{
 					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
 						'host' => Request::$instance->cdn[$cdn_key],
