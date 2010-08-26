@@ -8,9 +8,9 @@ return array
 		'channel'	=> 102,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'blah.fr',
-			'#2' => 'blah.fr',
-			'#3' => 'blah.fr'
+			'blah.fr',
+			'blah.fr',
+			'blah.fr'
 			)	
 		),
 	'blah.es' => array(
@@ -19,9 +19,9 @@ return array
 		'channel'	=> 103,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'blah.es',
-			'#2' => 'blah.es',
-			'#3' => 'blah.es'
+			'blah.es',
+			'blah.es',
+			'blah.es'
 			)
 		),
 	'blah.co.uk' => array(
@@ -30,9 +30,9 @@ return array
 		'channel'	=> 4,
 		'env'		=> Kohana::DEVELOPMENT,
 		'cdn'		=> array(
-			'#1' => 'blah.co.uk',
-			'#2' => 'blah.co.uk',
-			'#3' => 'blah.co.uk'
+			'blah.co.uk',
+			'blah.co.uk',
+			'blah.co.uk'
 			)
 		)
 );
