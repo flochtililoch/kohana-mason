@@ -42,7 +42,8 @@ class Component_Controller extends Kohana_Controller
 			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) )
 			{
 				// Load assets for this specific component
-				$assets = Asset::load($comp);
+				$asset_mgr = new Asset($comp);
+				$assets = $asset_mgr->load()->files();
 				
 				if(Kohana::$caching === TRUE)
 				{	

@@ -10,6 +10,13 @@
 class Component_Asset
 {
 	/**
+	 * Component class used to retrieve assets files
+	 *
+	 * @access	private
+	 */
+	private $_comp = NULL;
+	
+	/**
 	 * files list to process
 	 *
 	 * @access	private
@@ -25,10 +32,11 @@ class Component_Asset
 	
 	/**
 	 * Cache storing resources and their corresponding CDN
+	 * Used by all components
 	 *
 	 * @access	private
 	 */
-	private $_resources = array();
+	protected static $_resources = array();
 	
 	/**
 	 * Constructor
@@ -37,40 +45,93 @@ class Component_Asset
 	 * @return	void
 	 * @access	public
 	 */
-	public function __construct(array $files)
+	public function __construct($comp)
 	{
-		$this->_files = $files;
 		$this->_config = Kohana::config('asset');
+		$this->_comp = $comp;
+	}
+	
+	public static function resources()
+	{
+		if(empty(Asset::$_resources))
+		{
+			$assets = Kohana::cache('assets_ressources_'.Kohana::$environment.'_'.Kohana::$locale.'_'.Kohana::$locale.'_'.Kohana::$channel);
+			Asset::$_resources = $assets ? $assets : Asset::$_resources;
+		}
+		return Asset::$_resources;
+	
 	}
 	
 	/**
-	 * Returns which CDN to use for a given resource
-	 * CDNs can be spread among over resources to help parallel download
-	 * Each resource can have just one CDN as well
-	 *
-	 * @param	string	resource
-	 * @return	string	CDN to be used
+	 * Load assets for given comp
+	 * 
+	 * @return	Asset instance
 	 * @access	public
 	 */
-	public function CDN($res)
+	public function load()
 	{
-		// We should have at least one CDN defined in the list
-		if(!count(Request::instance()->cdn))
+		// Load component context
+		$comp = $this->_comp;
+		$context = Controller::get_context($comp);
+		
+		// Work with controller's entities only
+		$entities = Kohana::$tree['comps'][$context['path']][$context['directory']][$context['name']];
+		
+		// Component's path
+		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
+
+		// Retrieve scripts and stylesheets for this specific component
+		$this->_files = array($context['assets_cache_key'] => array());
+		
+		// Find which CDN to use
+		$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
+		
+		// Loop trough assets type
+		foreach(array('scripts', 'stylesheets') as $type)
 		{
-			return FALSE;
-		}
-		// If this resource already has associated CDN, don't reprocess
-		if(!array_key_exists($res, $this->_resources))
-		{
-			// Shift to the next CDN in the list
-			$this->_cdn_idx = ($this->_cdn_idx !== NULL && ($this->_cdn_idx < (count(Request::instance()->cdn) - 1)) ? $this->_cdn_idx + 1 : 0);
-			$this->_resources[$res] = $this->_cdn_idx;
+			if(array_key_exists($type, $entities))
+			{
+				// Make sure files are sorted in the right order
+				ksort($entities[$type]);
+				
+				// If there's user defined entities and comp need to load some
+				$used_entities = array();
+				if(is_array($context['assets']) && count($context['assets']) && array_key_exists('user', $entities[$type]))
+				{
+					// User defined entities get priority over default behviour ones
+					$tmp_used_entities = array_intersect_key($entities[$type]['user'], array_flip($context['assets']));
+
+					// Sort used entities into user's order
+					foreach($context['assets'] as $asset)
+					{
+						if(!array_key_exists($asset, $tmp_used_entities))
+						{
+							throw new Kohana_Exception('Unable to find required asset: :asset',
+								array(':asset' => $asset));
+						}
+
+						$used_entities[$asset] = $tmp_used_entities[$asset];
+					}
+				}
+
+				// Queue default behaviour entities
+				$used_entities += $entities[$type][''];
+
+				// Include assets files
+				foreach($used_entities as $entity)
+				{
+					$this->_files[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
+						'host' => Request::$instance->cdn[$cdn_key],
+						'file' => $path.'/'.$type.'/'.$entity['name'],
+						'cache_id' => $entity['cache_id']
+						);
+				}
+			}
 		}
 		
-		// Return the CDN to be used
-		return Request::instance()->cdn[$this->_resources[$res]];
+		return $this;
 	}
-
+	
 	/**
 	 * Run packing
 	 *
@@ -142,73 +203,45 @@ class Component_Asset
 	}
 	
 	/**
-	 * Load assets for given comp and returns an array of paths
+	 * Returns list of loaded files
 	 * 
-	 * @return	
+	 * @return	array
 	 * @access	public
-	 * @static
 	 */
-	public static function load($comp)
+	public function files()
 	{
-		$context = Controller::get_context($comp);
-		
-		// Work with controller's entities only
-		$entities = Kohana::$tree['comps'][$context['path']][$context['directory']][$context['name']];
-		
-		// Component's path
-		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
-
-		// Retrieve scripts and stylesheets for this specific component
-		$assets = array($context['assets_cache_key'] => array());
-		
-		// Find which CDN to use
-		$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
-		
-		// Loop trough assets type
-		foreach(array('scripts', 'stylesheets') as $type)
-		{
-			if(array_key_exists($type, $entities))
-			{
-				// Make sure files are sorted in the right order
-				ksort($entities[$type]);
-				
-				// If there's user defined entities and comp need to load some
-				$used_entities = array();
-				if(is_array($context['assets']) && count($context['assets']) && array_key_exists('user', $entities[$type]))
-				{
-					// User defined entities get priority over default behviour ones
-					$tmp_used_entities = array_intersect_key($entities[$type]['user'], array_flip($context['assets']));
-
-					// Sort used entities into user's order
-					foreach($context['assets'] as $asset)
-					{
-						if(!array_key_exists($asset, $tmp_used_entities))
-						{
-							throw new Kohana_Exception('Unable to find required asset: :asset',
-								array(':asset' => $asset));
-						}
-
-						$used_entities[$asset] = $tmp_used_entities[$asset];
-					}
-				}
-
-				// Queue default behaviour entities
-				$used_entities += $entities[$type][''];
-
-				// Include assets files
-				foreach($used_entities as $entity)
-				{
-					$assets[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
-						'host' => Request::$instance->cdn[$cdn_key],
-						'file' => $path.'/'.$type.'/'.$entity['name'],
-						'cache_id' => $entity['cache_id']
-						);
-				}
-			}
-		}
-
-		return $assets;
+		return $this->_files;
 	}
+	
+	/**
+	 * Returns which CDN to use for a given resource
+	 * CDNs can be spread among over resources to help parallel download
+	 * Each resource can have just one CDN as well
+	 *
+	 * @param	string	resource
+	 * @return	string	CDN to be used
+	 * @access	public
+	 */
+	public function CDN($res)
+	{
+		// We should have at least one CDN defined in the list
+		if(!count(Request::instance()->cdn))
+		{
+			return FALSE;
+		}
+		// If this resource already has associated CDN, don't reprocess
+		if(!array_key_exists($res, Asset::$_resources))
+		{
+			// Shift to the next CDN in the list
+			$this->_cdn_idx = ($this->_cdn_idx !== NULL && ($this->_cdn_idx < (count(Request::instance()->cdn) - 1)) ? $this->_cdn_idx + 1 : 0);
+			Asset::$_resources[$res] = $this->_cdn_idx;
+		}
+		
+		// Return the CDN to be used
+		return Request::instance()->cdn[Asset::$_resources[$res]];
+	}
+	
+	
 	
 	// If non-dev env., pack assets in one single file named after the assets array md5ed
 	// Each comp would then have a single file, compressed.
