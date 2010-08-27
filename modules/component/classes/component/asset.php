@@ -10,11 +10,11 @@
 class Component_Asset
 {
 	/**
-	 * Component class used to retrieve assets files
+	 * Asset instance container
 	 *
-	 * @access	private
+	 * @access	public
 	 */
-	private $_comp = NULL;
+	public static $instance = NULL;
 	
 	/**
 	 * files list to process
@@ -31,47 +31,93 @@ class Component_Asset
 	private $_cdn_idx = NULL;
 	
 	/**
+	 * Key used to retrieve cached resources and their corresponding CDN
+	 *
+	 * @access	private
+	 */
+	private $_resources_cache_key = NULL;
+	
+	/**
 	 * Cache storing resources and their corresponding CDN
 	 * Used by all components
 	 *
 	 * @access	private
 	 */
-	protected static $_resources = array();
+	private $_resources = array();
 	
 	/**
-	 * Constructor
+	 * Asset main instance
 	 *
-	 * @param	array	list of files to be processed
-	 * @return	void
+	 * @return	asset	Asset object
 	 * @access	public
 	 */
-	public function __construct($comp)
+	public static function instance()
 	{
-		$this->_config = Kohana::config('asset');
-		$this->_comp = $comp;
+		if(Asset::$instance === NULL)
+		{
+			Asset::$instance = new Asset();
+			Asset::$instance->_config = Kohana::config('asset');
+			Asset::$instance->_resources_cache_key = 'assets_ressources_'.Kohana::$environment.'_'.Kohana::$locale.'_'.Kohana::$locale.'_'.Kohana::$channel;
+			Asset::$instance->_resources = Kohana::cache(Asset::$instance->_resources_cache_key);
+			if(Asset::$instance->_resources === NULL)
+			{
+				Asset::$instance->_resources = array();
+			}
+		}
+		return Asset::$instance;
 	}
 	
-	public static function resources()
+	/**
+	 * Returns list of loaded files
+	 * 
+	 * @return	array
+	 * @access	public
+	 */
+	public function files()
 	{
-		if(empty(Asset::$_resources))
-		{
-			$assets = Kohana::cache('assets_ressources_'.Kohana::$environment.'_'.Kohana::$locale.'_'.Kohana::$locale.'_'.Kohana::$channel);
-			Asset::$_resources = $assets ? $assets : Asset::$_resources;
-		}
-		return Asset::$_resources;
+		return $this->_files;
+	}
 	
+	/**
+	 * Returns which CDN to use for a given resource
+	 * CDNs can be spread among over resources to help parallel download
+	 * Each resource can have just one CDN as well
+	 *
+	 * @param	string	resource
+	 * @return	string	CDN to be used
+	 * @access	public
+	 */
+	public static function CDN($res)
+	{
+		// We should have at least one CDN defined in the list
+		if(!count(Request::instance()->cdn))
+		{
+			return FALSE;
+		}
+		// If this resource already has associated CDN, don't reprocess
+		if(!array_key_exists($res, Asset::$instance->_resources))
+		{
+			// Shift to the next CDN in the list
+			Asset::$instance->_cdn_idx = (Asset::$instance->_cdn_idx !== NULL && (Asset::$instance->_cdn_idx < (count(Request::instance()->cdn) - 1)) ? Asset::$instance->_cdn_idx + 1 : 0);
+			
+			// Cache processed resource
+			Asset::$instance->_resources[$res] = Asset::$instance->_cdn_idx;
+		}
+		
+		// Return the CDN to be used
+		return Request::instance()->cdn[Asset::$instance->_resources[$res]];
 	}
 	
 	/**
 	 * Load assets for given comp
 	 * 
+	 * @param	string	Component class in which to look for assets files
 	 * @return	Asset instance
 	 * @access	public
 	 */
-	public function load()
+	public function load($comp)
 	{
 		// Load component context
-		$comp = $this->_comp;
 		$context = Controller::get_context($comp);
 		
 		// Work with controller's entities only
@@ -79,9 +125,7 @@ class Component_Asset
 		
 		// Component's path
 		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
-
-		// Retrieve scripts and stylesheets for this specific component
-		$this->_files = array($context['assets_cache_key'] => array());
+		$this->_files = array();
 		
 		// Find which CDN to use
 		$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
@@ -120,7 +164,7 @@ class Component_Asset
 				// Include assets files
 				foreach($used_entities as $entity)
 				{
-					$this->_files[$context['assets_cache_key']][$type][$path.'/'.$type.'/'.$entity['name']] = array(
+					$this->_files[$type][$path.'/'.$type.'/'.$entity['name']] = array(
 						'host' => Request::$instance->cdn[$cdn_key],
 						'file' => $path.'/'.$type.'/'.$entity['name'],
 						'cache_id' => $entity['cache_id']
@@ -141,7 +185,7 @@ class Component_Asset
 	 */
 	public function pack()
 	{
-		$packed = array();
+		$packed = array_flip(array_keys($this->_config->types));
 		
 		// Loop through all types of files
 		foreach($this->_files as $type => $files)
@@ -152,8 +196,8 @@ class Component_Asset
 			foreach($files as $file)
 			{
 				// get current file realpath
-				$file = Kohana::find_file('comps', $file, $this->_config->types[$type]);
-
+				$file = Kohana::find_file('comps', $file['file'], $this->_config->types[$type]);
+				
 				// get file last modification date
 				$_files[$file] = filemtime($file);
 				
@@ -170,7 +214,7 @@ class Component_Asset
 									'/(?<!behavior):(.*)?url\((.*)\)/',
 									create_function(
 										'$matches',
-										'return ":".$matches[1]."url(".$GLOBALS["packer"]->CDN($matches[2]).$matches[2].")";'
+										'return ":".$matches[1]."url(".Asset::CDN($matches[2]).$matches[2].")";'
 										),
 									$packed[$type]
 									);
@@ -180,7 +224,7 @@ class Component_Asset
 									'/src="(.*?)"/',
 									create_function(
 										'$matches',
-										'return "src=\"".$GLOBALS["packer"]->CDN($matches[1]).$matches[1]."\"";'
+										'return "src=\"".Asset::CDN($matches[1]).$matches[1]."\"";'
 										),
 									$packed[$type]
 									);
@@ -201,47 +245,6 @@ class Component_Asset
 			unlink($tmp_file);
 		}
 	}
-	
-	/**
-	 * Returns list of loaded files
-	 * 
-	 * @return	array
-	 * @access	public
-	 */
-	public function files()
-	{
-		return $this->_files;
-	}
-	
-	/**
-	 * Returns which CDN to use for a given resource
-	 * CDNs can be spread among over resources to help parallel download
-	 * Each resource can have just one CDN as well
-	 *
-	 * @param	string	resource
-	 * @return	string	CDN to be used
-	 * @access	public
-	 */
-	public function CDN($res)
-	{
-		// We should have at least one CDN defined in the list
-		if(!count(Request::instance()->cdn))
-		{
-			return FALSE;
-		}
-		// If this resource already has associated CDN, don't reprocess
-		if(!array_key_exists($res, Asset::$_resources))
-		{
-			// Shift to the next CDN in the list
-			$this->_cdn_idx = ($this->_cdn_idx !== NULL && ($this->_cdn_idx < (count(Request::instance()->cdn) - 1)) ? $this->_cdn_idx + 1 : 0);
-			Asset::$_resources[$res] = $this->_cdn_idx;
-		}
-		
-		// Return the CDN to be used
-		return Request::instance()->cdn[Asset::$_resources[$res]];
-	}
-	
-	
 	
 	// If non-dev env., pack assets in one single file named after the assets array md5ed
 	// Each comp would then have a single file, compressed.
