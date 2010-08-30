@@ -76,3 +76,8 @@ a
 	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/images/blabla.jpg",sizingMethod="crop");
 	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/assets/images/default/global/more_open.png",sizingMethod="crop");
 }
+@font-face
+{
+	font-family: "Calibri";
+	src: url('../font/calibri.ttf');
+}
