@@ -185,7 +185,7 @@ class Component_Asset
 	 */
 	public function pack()
 	{
-		$packed = array_flip(array_keys($this->_config->types));
+		$packed = array_fill_keys(array_keys($this->_config->types), NULL);
 		
 		// Loop through all types of files
 		foreach($this->_files as $type => $files)
@@ -211,10 +211,10 @@ class Component_Asset
 				// convert relative urls into absolute urls within url() statements
 				// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
 				$packed[$type] = preg_replace_callback(
-									'/(?<!behavior):(.*)?url\((.*)\)/',
+									'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
 									create_function(
 										'$matches',
-										'return ":".$matches[1]."url(".Asset::CDN($matches[2]).$matches[2].")";'
+										'return ":".$matches[1]."url(".$matches[2].Asset::CDN($matches[3]).$matches[3].$matches[2].")";'
 										),
 									$packed[$type]
 									);
