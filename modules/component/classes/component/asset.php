@@ -46,6 +46,13 @@ class Component_Asset
 	private $_resources = array();
 	
 	/**
+	 * List of packed files
+	 *
+	 * @access	private
+	 */
+	private $_packed_files = array();
+	
+	/**
 	 * Asset main instance
 	 *
 	 * @return	asset	Asset object
@@ -78,6 +85,36 @@ class Component_Asset
 		return $this->_files;
 	}
 	
+	/**
+	 * Returns packed filenames
+	 * 
+	 * @return	array
+	 * @access	public
+	 */
+	public function packed_files()
+	{
+		if(empty($this->_packed_files) && !empty($this->_files))
+		{
+			$this->_packed_files = array_fill_keys(array_keys($this->_config->types), NULL);
+			foreach($this->_config->types as $type => $file_extension)
+			{
+				// File name is a hash of serialized entities
+				$filename = sha1(serialize($this->_files[$type]));
+				$file = $this->_config->dest.$filename.'.'.$this->_config->types[$type];
+				$cache_id = file_exists($file) ? filemtime($file) : NULL;
+				
+				$this->_packed_files[$type] = array(0 => array(
+					'host' => NULL,
+					'file' => $filename,
+					'cache_id' => $cache_id
+					));
+			}
+		
+		}
+		
+		return $this->_packed_files;
+	}
+
 	/**
 	 * Returns which CDN to use for a given resource
 	 * CDNs can be spread among over resources to help parallel download
@@ -127,9 +164,6 @@ class Component_Asset
 		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
 		$this->_files = array();
 		
-		// Find which CDN to use
-		$cdn_key = property_exists($comp, 'cdn') ? $comp::$cdn : key(Request::$instance->cdn);
-		
 		// Loop trough assets type
 		foreach(array('scripts', 'stylesheets') as $type)
 		{
@@ -164,15 +198,18 @@ class Component_Asset
 				// Include assets files
 				foreach($used_entities as $entity)
 				{
+					// Find which CDN to use
+					$cdn = property_exists($comp, 'cdn') ? Request::$instance->cdn[$comp::$cdn] : Asset::CDN($path.'/'.$type.'/'.$entity['name']);
+
 					$this->_files[$type][$path.'/'.$type.'/'.$entity['name']] = array(
-						'host' => Request::$instance->cdn[$cdn_key],
+						'host' => $cdn,
 						'file' => $path.'/'.$type.'/'.$entity['name'],
 						'cache_id' => $entity['cache_id']
 						);
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 	
@@ -197,8 +234,8 @@ class Component_Asset
 			{
 				// get current file realpath
 				$file = Kohana::find_file('comps', $file['file'], $this->_config->types[$type]);
-				
-				// get file last modification date
+
+				// get file last modification time
 				$_files[$file] = filemtime($file);
 				
 				// concat file content with other same type files
@@ -230,8 +267,9 @@ class Component_Asset
 									);
 			}
 			
-			// File name is a hash of concatenated files' contents
-			$file = sha1(serialize($_files)).'.'.$this->_config->types[$type];
+			// Get name of packed file
+			$files = $this->packed_files();
+			$file = $files[$type][0]['file'].'.'.$this->_config->types[$type];
 			$tmp_file = $this->_config->dest.'tmp_'.$file;
 			
 			// Write content in a temporary file
@@ -244,6 +282,8 @@ class Component_Asset
 			// Remove temporary file
 			unlink($tmp_file);
 		}
+
+		return $this;
 	}
 	
 	// If non-dev env., pack assets in one single file named after the assets array md5ed
