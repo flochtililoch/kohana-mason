@@ -1,5 +1,7 @@
 <comp>
 	<process>
+		<key name="protocol">Request::$protocol</key>
+		<key name="cdn">Request::$instance->cdn</key>
 		<key name="scripts">Request::$instance->assets['scripts']</key>
 	</process>
 </comp>
