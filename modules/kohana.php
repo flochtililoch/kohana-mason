@@ -304,7 +304,7 @@ class Kohana extends Kohana_Core
 		I18n::init(Kohana::$locale, Kohana::$channel);
 		
 		// Load Components tree
-		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree_'.Kohana::$locale.'_'.Kohana::$channel))  )
+		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree')) )
 		{
 			Component::init();
 			Kohana::$tree = Component::tree();
@@ -312,7 +312,7 @@ class Kohana extends Kohana_Core
 		    if(Kohana::$caching === TRUE)
 			{
 			    // tree cache never expire
-				Kohana::cache('tree_'.Kohana::$locale.'_'.Kohana::$channel, Kohana::$tree, 0);
+				Kohana::cache('tree', Kohana::$tree, 0);
 			}
 	    }
 
@@ -409,8 +409,14 @@ class Kohana extends Kohana_Core
 	 * @access	public
 	 * @static
 	 */
-	public static function cache($name, $data = NULL, $lifetime = 0, $namespace = APPNAME)
+	public static function cache($name, $data = NULL, $lifetime = 0, $namespace = NULL)
 	{
+		if($namespace === NULL)
+		{
+			// Default Namespace
+			$namespace = APPNAME.'_'.Kohana::$locale.'_'.Kohana::$channel;
+		}
+		
 		$name = $namespace.$name;
 
 		if ($data === NULL)
