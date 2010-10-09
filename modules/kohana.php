@@ -6,10 +6,12 @@
  * @author     Florent Bonomo
  */
 class Kohana extends Kohana_Core
-{
-
-	public static $domain_name = NULL;
-	public static $domain_ext = NULL;
+{	
+	/**
+	 * Debug constant
+	 */
+	const DEBUG_SILENT = 1;
+	const DEBUG_EXPLICIT = 2;
 
 	/**
 	 * Components tree
@@ -42,6 +44,14 @@ class Kohana extends Kohana_Core
 	 * @static
 	 */
 	public static $caching = TRUE;
+	
+	/**
+	 * Core caching status flag
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $debug = FALSE;
 	
 	/**
 	 * Core cache driver (module Cache)
@@ -196,6 +206,9 @@ class Kohana extends Kohana_Core
 		// Enable or disable internal caching
 		Kohana::$caching = (bool) $settings['caching'];
 		
+		// Enable or disable debug mode
+		Kohana::$debug = $settings['debug'];
+
 		// Create cache dir if not present
 		if(!is_dir(CACHEPATH.'kohana'))
 		{

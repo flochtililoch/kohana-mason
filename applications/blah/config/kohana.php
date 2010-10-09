@@ -3,7 +3,8 @@
 return array
 (
 	'timezone'		=> 'Europe/Paris',			// Server Timezone
-	'caching'		=> TRUE,					// Enable or disable internal caching
+	'debug'			=> Kohana::DEBUG_SILENT,	// Set level of debug (FALSE = disabled, Kohana::DEBUG_SILENT, Kohana::DEBUG_EXPLICIT)
+	'caching'		=> FALSE,					// Enable or disable internal caching
 	'profile'		=> TRUE,					// Enable or disable internal profiling
 	'logging'		=> FALSE,					// Enable or disable internal logging	
 	'errors'		=> TRUE
