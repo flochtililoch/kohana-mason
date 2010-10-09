@@ -6,11 +6,11 @@ return array
 		'appname'	=> 'blah',
 		'locale'	=> 'fr_FR',
 		'channel'	=> 102,
-		'env'		=> Kohana::DEVELOPMENT,
+		'env'		=> Kohana::TESTING,
 		'cdn'		=> array(
-			'blah.fr/assets',
-			'blah.fr/assets',
-			'blah.fr/assets'
+			'blah.fr/a',
+			'blah.fr/a',
+			'blah.fr/a'
 			)	
 		),
 	'blah.es' => array(
