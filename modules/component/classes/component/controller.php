@@ -42,8 +42,15 @@ class Component_Controller extends Kohana_Controller
 			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) )
 			{
 				// Load assets for this specific component
-				$assets = Asset::instance()->load($comp)->files();
+				Asset::instance()->load($comp);
 				
+				// Pack assets for Production and testing environements
+				if(in_array(Kohana::$environment, array(Kohana::PRODUCTION, Kohana::TESTING)))
+				{
+					Asset::instance()->pack();
+				}
+				$assets = Asset::instance()->files();
+
 				if(Kohana::$caching === TRUE)
 				{	
 					// Assets cache never expire
@@ -54,7 +61,7 @@ class Component_Controller extends Kohana_Controller
 			// Merge component's assets with main request current assets
 			if(!in_array($comp::$_assets_cache_key, $comp::$_assets_pushed))
 			{
-				Request::$instance->assets = array_merge_recursive(Request::$instance->assets, $assets);
+				Request::$instance->assets = array_replace_recursive(Request::$instance->assets, $assets);
 				
 				// Flag assets as pushed in the stack
 				$comp::$_assets_pushed[] = $comp::$_assets_cache_key;

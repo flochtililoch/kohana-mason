@@ -6,7 +6,7 @@ return array
 	'types' => array('scripts' => 'js', 'stylesheets' => 'css'),
 	
     // Path to the folder where packed files should be written
-    'dest' => CACHEPATH.'/assets/',
+    'dest' => CACHEPATH.'assets/',
 	
 	// Path to the compressor binary
 	'packer_bin' => SCPPATH.'/tools/yuicompressor-2.4.2.jar',

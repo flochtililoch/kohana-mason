@@ -82,6 +82,10 @@ class Component_Asset
 	 */
 	public function files()
 	{
+		if(!empty($this->_packed_files))
+		{
+			return $this->_packed_files;
+		}
 		return $this->_files;
 	}
 	
@@ -104,14 +108,14 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 				
 				$this->_packed_files[$type] = array(0 => array(
-					'host' => NULL,
+					'host' => Asset::CDN($filename),
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
 			}
 		
 		}
-		
+
 		return $this->_packed_files;
 	}
 
@@ -182,13 +186,10 @@ class Component_Asset
 					// Sort used entities into user's order
 					foreach($context['assets'] as $asset)
 					{
-						if(!array_key_exists($asset, $tmp_used_entities))
+						if(array_key_exists($asset, $tmp_used_entities))
 						{
-							throw new Kohana_Exception('Unable to find required asset: :asset',
-								array(':asset' => $asset));
+							$used_entities[$asset] = $tmp_used_entities[$asset];
 						}
-
-						$used_entities[$asset] = $tmp_used_entities[$asset];
 					}
 				}
 
@@ -266,45 +267,31 @@ class Component_Asset
 									$packed[$type]
 									);
 			}
-			
+
 			// Get name of packed file
 			$files = $this->packed_files();
 			$file = $files[$type][0]['file'].'.'.$this->_config->types[$type];
 			$tmp_file = $this->_config->dest.'tmp_'.$file;
 			
+			// Create assets cache dir if not present
+			if(!is_dir($this->_config->dest))
+			{
+				// Create directory
+				mkdir($this->_config->dest, 0777, TRUE);
+
+				// Set permissions (must be manually set to fix umask issues)
+				chmod($this->_config->dest, 0777);
+			}
+			
 			// Write content in a temporary file
-			file_put_contents($tmp_file, $packed[$type]);
+			file_put_contents($tmp_file, $packed[$type], FILE_APPEND | LOCK_EX);
 			
 			// Run the packer
 			$cl = sprintf($this->_config->packer_cl, $this->_config->packer_bin, $this->_config->dest.$file, $tmp_file);
-			system($cl);
-			
-			// Remove temporary file
-			unlink($tmp_file);
+			system($cl, $out);
 		}
-
+		
 		return $this;
 	}
-	
-	// If non-dev env., pack assets in one single file named after the assets array md5ed
-	// Each comp would then have a single file, compressed.
-	// One top level caching should be then done
-	// Need to think about what would be best suited for performance :
-	// one single file based on the combination of all components assets ?
-	// or one file per autohandler level ?
-	// or a combination of both ?
-	// IDEA : a component key, pack_assets, set the name of the file in which this component's
-	//        and all its 'childs' assets will be packed in. If set to false, will explicitly exclude
-	//		  this component assets from its parent packed file.
-	//        i.e. : /foo/bar/autohandler has the key 'main'.
-	//               Assets from /foo/autohandler, /autohandler and all components loaded from sub request 
-	//               will be packed in file 'main'
-	// How it works :
-	// assets files are queued from top to bottom (/, /foo, /foo/bar ...), in the order their comps are executed
-	// Before loading assets in the view, need to loop through Request::$instance->assets, find from each asset
-	// its component, get the pack_assets key; if false, leave the current asset in the list,
-	// if set, take the current asset content and concat it in the string name after the key value, then remove
-	// the current asset from the array.
-	// Then pack all strings into files
 
 }
