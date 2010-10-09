@@ -42,6 +42,18 @@
 		{
 			$this->user = Auth::instance()->get_user();
 		}
+		
+		$debug = FALSE;
+		if(Kohana::$debug !== FALSE)
+		{
+			$debug['data'] = array(
+				'app_environment' => Kohana::$environment,
+				'app_local' => Kohana::$locale,
+				'app_channel' => Kohana::$channel
+				);
+			$debug['silent'] = Kohana::$debug === Kohana::DEBUG_SILENT;
+			$debug['explicit'] = Kohana::$debug === Kohana::DEBUG_EXPLICIT;
+		}
 
 		]]>
 	</php>
@@ -49,5 +61,6 @@
 		<key name="logged_in" context="global">$logged_in</key>
 		<key name="login_failed" context="global">$login_failed</key>
 		<key name="cdn">Request::$instance->cdn</key>
+		<key name="debug">$debug</key>
 	</process>
 </comp>

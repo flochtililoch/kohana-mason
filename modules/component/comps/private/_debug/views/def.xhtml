@@ -1,0 +1,5 @@
+<meta tal:condition="debug/silent" tal:repeat="entry debug/data" tal:attributes="name repeat/entry/key; value entry"/>
+<dl tal:condition="debug/explicit" tal:repeat="entry debug/data">
+	<dt tal:content="repeat/entry/key"/>
+	<dd tal:content="entry"/>
+</dl>

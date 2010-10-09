@@ -1,0 +1,14 @@
+<comp>
+	<php>
+		<![CDATA[
+		$debug = FALSE;
+		if(is_array($this->request->args))
+		{
+			$debug = array_shift($this->request->args);
+		}
+		]]>
+	</php>
+    <process>
+		<key name="debug">$debug</key>
+	</process>
+</comp>
