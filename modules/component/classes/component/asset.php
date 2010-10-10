@@ -262,7 +262,8 @@ class Component_Asset
 				}
 
 				$filename = key($packed_files[$type][$cache_key]).'.'.Asset::config()->types[$type];
-				$tmp_file = Asset::config()->dest.''.$filename;
+				$tmp_file = Asset::config()->dest.(Asset::config()->compress === TRUE ? 'tmp_' : '').$filename;
+				$comment = '/* '.var_export($files, TRUE).'*/';
 			
 				// Create assets cache dir if not present
 				if(!is_dir(Asset::config()->dest))
@@ -275,12 +276,15 @@ class Component_Asset
 				}
 			
 				// Write content in a temporary file
-				file_put_contents($tmp_file, $packed[$type][$cache_key]);
+				file_put_contents($tmp_file, $comment.$packed[$type][$cache_key]);
 			
-				// Run the packer
-				//$cl = sprintf(Asset::config()->packer_cl, Asset::config()->packer_bin, Asset::config()->dest.$filename, $tmp_file);
-				//system($cl, $out);
-				//unlink($tmp_file);
+				if(Asset::config()->compress === TRUE)
+				{
+					// Run the packer
+					$cl = sprintf(Asset::config()->packer_cl, Asset::config()->packer_bin, Asset::config()->dest.$filename, $tmp_file);
+					system($cl, $out);
+					unlink($tmp_file);
+				}
 			}
 		}
 

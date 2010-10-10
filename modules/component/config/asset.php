@@ -7,6 +7,9 @@ return array
 	
     // Path to the folder where packed files should be written
     'dest' => CACHEPATH.'assets/',
+
+	// Compression enabled
+	'compress' => TRUE,
 	
 	// Path to the compressor binary
 	'packer_bin' => SCPPATH.'/tools/yuicompressor-2.4.2.jar',
