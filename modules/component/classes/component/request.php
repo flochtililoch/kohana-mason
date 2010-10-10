@@ -135,5 +135,59 @@ class Component_Request extends Kohana_Request
 		// Return the full array
 		return array_shift($this->_params);
 	}
+	
+	/**
+	 * Retrieves assets for the current request
+	 *
+	 * @param	string	asset type
+	 * @return  array   assets files list
+	 */
+	public function get_assets($type)
+	{
+		$assets_key = 'assets_'.$type.'_'.sha1(serialize(Request::$instance->assets));
+
+		if(! (Kohana::$caching === TRUE && $assets = Kohana::cache($assets_key)) )
+		{
+			// Testing and Production environments loads packed assets
+			if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
+			{
+				$files = Asset::instance()->pack(Request::$instance->assets);
+			}
+			// Development and Staging environments loads unpacked assets
+			else
+			{
+				$files = Request::$instance->assets;
+			}
+			
+			// Flatern assets array
+			$assets = array();
+			foreach(array_keys($files[$type]) as $cache_key)
+			{
+				$assets += $files[$type][$cache_key];
+			}
+
+			if(Kohana::$caching === TRUE)
+			{
+				Kohana::cache($assets_key, $assets);
+			}
+		}
+		return $assets;
+	}
+	
+	/**
+	 * Stylesheets helper
+	 */
+	public function get_stylesheets()
+	{
+		return $this->get_assets('stylesheets');
+	}
+	
+	/**
+	 * Scripts helper
+	 */
+	public function get_scripts()
+	{
+		return $this->get_assets('scripts');
+	}
 
 }	// End Component_Request

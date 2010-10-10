@@ -15,14 +15,14 @@ class Component_Asset
 	 * @access	public
 	 */
 	public static $instance = NULL;
-	
+
 	/**
-	 * files list to process
+	 * Asset config container
 	 *
-	 * @access	private
+	 * @access	public
 	 */
-	private $_files = array();
-	
+	public static $config = NULL;
+
 	/**
 	 * Index used to spread CDNs over resources
 	 *
@@ -46,13 +46,6 @@ class Component_Asset
 	private $_resources = array();
 	
 	/**
-	 * List of packed files
-	 *
-	 * @access	private
-	 */
-	private $_packed_files = array();
-	
-	/**
 	 * Asset main instance
 	 *
 	 * @return	asset	Asset object
@@ -63,7 +56,6 @@ class Component_Asset
 		if(Asset::$instance === NULL)
 		{
 			Asset::$instance = new Asset();
-			Asset::$instance->_config = Kohana::config('asset');
 			Asset::$instance->_resources_cache_key = 'assets_ressources_'.Kohana::$environment.'_'.Kohana::$locale.'_'.Kohana::$locale.'_'.Kohana::$channel;
 			Asset::$instance->_resources = Kohana::cache(Asset::$instance->_resources_cache_key);
 			if(Asset::$instance->_resources === NULL)
@@ -75,48 +67,18 @@ class Component_Asset
 	}
 	
 	/**
-	 * Returns list of loaded files
-	 * 
-	 * @return	array
+	 * Load config
+	 *
+	 * @return	config	config object
 	 * @access	public
 	 */
-	public function files()
+	public static function config()
 	{
-		if(!empty($this->_packed_files))
+		if(empty(Asset::$config))
 		{
-			return $this->_packed_files;
+			Asset::$config = Kohana::config('asset');
 		}
-		return $this->_files;
-	}
-	
-	/**
-	 * Returns packed filenames
-	 * 
-	 * @return	array
-	 * @access	public
-	 */
-	public function packed_files()
-	{
-		if(empty($this->_packed_files) && !empty($this->_files))
-		{
-			$this->_packed_files = array_fill_keys(array_keys($this->_config->types), NULL);
-			foreach($this->_config->types as $type => $file_extension)
-			{
-				// File name is a hash of serialized entities
-				$filename = sha1(serialize($this->_files[$type]));
-				$file = $this->_config->dest.$filename.'.'.$this->_config->types[$type];
-				$cache_id = file_exists($file) ? filemtime($file) : NULL;
-				
-				$this->_packed_files[$type] = array(0 => array(
-					'host' => Asset::CDN($filename),
-					'file' => $filename,
-					'cache_id' => $cache_id
-					));
-			}
-		
-		}
-
-		return $this->_packed_files;
+		return Asset::$config;
 	}
 
 	/**
@@ -166,7 +128,8 @@ class Component_Asset
 		
 		// Component's path
 		$path = $context['path'].'/'.$context['directory'].'_'.$context['name'];
-		$this->_files = array();
+	
+		$files = array();
 		
 		// Loop trough assets type
 		foreach(array('scripts', 'stylesheets') as $type)
@@ -202,16 +165,19 @@ class Component_Asset
 					// Find which CDN to use
 					$cdn = property_exists($comp, 'cdn') ? Request::$instance->cdn[$comp::$cdn] : Asset::CDN($path.'/'.$type.'/'.$entity['name']);
 
-					$this->_files[$type][$path.'/'.$type.'/'.$entity['name']] = array(
-						'host' => $cdn,
-						'file' => $path.'/'.$type.'/'.$entity['name'],
-						'cache_id' => $entity['cache_id']
-						);
+					$files = array_replace_recursive($files, array(
+						$type => array(
+							$context['assets_cache_key'] => array(
+								$path.'/'.$type.'/'.$entity['name'] => array(
+									'host' => $cdn,
+									'file' => $path.'/'.$type.'/'.$entity['name'],
+									'cache_id' => $entity['cache_id']
+									)))));
 				}
 			}
 		}
 
-		return $this;
+		return $files;
 	}
 	
 	/**
@@ -221,77 +187,104 @@ class Component_Asset
 	 * @return	array	paths of written packed files
 	 * @access	public
 	 */
-	public function pack()
+	public static function pack($assets)
 	{
-		$packed = array_fill_keys(array_keys($this->_config->types), NULL);
-		
+		// Get packed files names
+		$packed_files = array_fill_keys(array_keys(Asset::config()->types), NULL);
+		foreach(Asset::config()->types as $type => $file_extension)
+		{
+			if(!isset($assets[$type]))
+			{
+				continue;
+			}
+
+			foreach($assets[$type] as $group => $files)
+			{
+				// File name is a hash of serialized entities
+				$filename = sha1(serialize($files));
+				$file = Asset::config()->dest.$filename.'.'.Asset::config()->types[$type];
+				$cache_id = file_exists($file) ? filemtime($file) : NULL;
+
+				$packed_files[$type][$group] = array($filename => array(
+					'host' => Asset::CDN($filename),
+					'file' => $filename,
+					'cache_id' => $cache_id
+					));
+			}
+		}
+
+		$packed = array_fill_keys(array_keys(Asset::config()->types), NULL);
+
 		// Loop through all types of files
-		foreach($this->_files as $type => $files)
+		foreach($assets as $type => $files_groups)
 		{
 			$_files = array();
-			
+			$packed[$type] = array_fill_keys(array_keys($files_groups), NULL);
+
 			// Loop through all files
-			foreach($files as $file)
+			foreach($files_groups as $cache_key => $files)
 			{
-				// get current file realpath
-				$file = Kohana::find_file('comps', $file['file'], $this->_config->types[$type]);
+				foreach($files as $file)
+				{
+					// get current file realpath
+					$file = Kohana::find_file('comps', $file['file'], Asset::config()->types[$type]);
 
-				// get file last modification time
-				$_files[$file] = filemtime($file);
-				
-				// concat file content with other same type files
-				$packed[$type] .= file_get_contents($file);
+					// get file last modification time
+					$_files[$file] = filemtime($file);
+
+					// concat file content with other same type files
+					$packed[$type][$cache_key] .= file_get_contents($file);					
+				}
+
+				// Replace relative URLs into absolute if CDNs provided
+				if(count(Request::instance()->cdn))
+				{
+					// convert relative urls into absolute urls within url() statements
+					// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
+					$packed[$type][$cache_key] = preg_replace_callback(
+													'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
+													create_function(
+														'$matches',
+														'return ":".$matches[1]."url(".$matches[2].Asset::CDN($matches[3]).$matches[3].$matches[2].")";'
+														),
+													$packed[$type][$cache_key]
+													);
+
+					// convert relative urls into absolute urls within src="" statements
+					$packed[$type][$cache_key] = preg_replace_callback(
+													'/src="(.*?)"/',
+													create_function(
+														'$matches',
+														'return "src=\"".Asset::CDN($matches[1]).$matches[1]."\"";'
+														),
+													$packed[$type][$cache_key]
+													);
+				}
+
+				$filename = key($packed_files[$type][$cache_key]).'.'.Asset::config()->types[$type];
+				$tmp_file = Asset::config()->dest.''.$filename;
+			
+				// Create assets cache dir if not present
+				if(!is_dir(Asset::config()->dest))
+				{
+					// Create directory
+					mkdir(Asset::config()->dest, 0777, TRUE);
+
+					// Set permissions (must be manually set to fix umask issues)
+					chmod(Asset::config()->dest, 0777);
+				}
+			
+				// Write content in a temporary file
+				file_put_contents($tmp_file, $packed[$type][$cache_key]);
+			
+				// Run the packer
+				//$cl = sprintf(Asset::config()->packer_cl, Asset::config()->packer_bin, Asset::config()->dest.$filename, $tmp_file);
+				//system($cl, $out);
+				//unlink($tmp_file);
 			}
-			
-			// Replace relative URLs into absolute if CDNs provided
-			if(count(Request::instance()->cdn))
-			{
-				// convert relative urls into absolute urls within url() statements
-				// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
-				$packed[$type] = preg_replace_callback(
-									'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
-									create_function(
-										'$matches',
-										'return ":".$matches[1]."url(".$matches[2].Asset::CDN($matches[3]).$matches[3].$matches[2].")";'
-										),
-									$packed[$type]
-									);
-
-				// convert relative urls into absolute urls within src="" statements
-				$packed[$type] = preg_replace_callback(
-									'/src="(.*?)"/',
-									create_function(
-										'$matches',
-										'return "src=\"".Asset::CDN($matches[1]).$matches[1]."\"";'
-										),
-									$packed[$type]
-									);
-			}
-
-			// Get name of packed file
-			$files = $this->packed_files();
-			$file = $files[$type][0]['file'].'.'.$this->_config->types[$type];
-			$tmp_file = $this->_config->dest.'tmp_'.$file;
-			
-			// Create assets cache dir if not present
-			if(!is_dir($this->_config->dest))
-			{
-				// Create directory
-				mkdir($this->_config->dest, 0777, TRUE);
-
-				// Set permissions (must be manually set to fix umask issues)
-				chmod($this->_config->dest, 0777);
-			}
-			
-			// Write content in a temporary file
-			file_put_contents($tmp_file, $packed[$type], FILE_APPEND | LOCK_EX);
-			
-			// Run the packer
-			$cl = sprintf($this->_config->packer_cl, $this->_config->packer_bin, $this->_config->dest.$file, $tmp_file);
-			system($cl, $out);
 		}
-		
-		return $this;
+
+		return $packed_files;
 	}
 
 }

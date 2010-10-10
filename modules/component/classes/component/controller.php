@@ -42,14 +42,7 @@ class Component_Controller extends Kohana_Controller
 			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) )
 			{
 				// Load assets for this specific component
-				Asset::instance()->load($comp);
-				
-				// Pack assets for Production and testing environements
-				if(in_array(Kohana::$environment, array(Kohana::PRODUCTION, Kohana::TESTING)))
-				{
-					Asset::instance()->pack();
-				}
-				$assets = Asset::instance()->files();
+				$assets = Asset::instance()->load($comp);
 
 				if(Kohana::$caching === TRUE)
 				{	
@@ -85,7 +78,7 @@ class Component_Controller extends Kohana_Controller
 					$comp,
 					$views['cache_id']
 					);
-					
+		
 				// Return view result
     			return $this->request;
 			}
