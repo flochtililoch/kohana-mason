@@ -1,4 +1,7 @@
 <comp>
+	<attr>
+		<key name="_assets_cache_key" visibility="protected static">'home'</key>
+	</attr>
 	<php>
 		<![CDATA[
 			$specialoffers = array(

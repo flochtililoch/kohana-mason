@@ -1,3 +1,6 @@
 <comp>
+	<attr>
+		<key name="_assets_cache_key" visibility="protected static">'about'</key>
+	</attr>
 	<process/>
 </comp>
