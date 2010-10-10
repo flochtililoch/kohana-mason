@@ -8,9 +8,9 @@ return array
 		'channel'	=> 102,
 		'env'		=> Kohana::TESTING,
 		'cdn'		=> array(
-			'blah.fr/a',
-			'blah.fr/a',
-			'blah.fr/a'
+			'blah.fr/a1',
+			'blah.fr/a2',
+			'blah.fr/a3'
 			)	
 		),
 	'blah.es' => array(
@@ -28,11 +28,11 @@ return array
 		'appname'	=> 'blah',
 		'locale'	=> 'en_GB',
 		'channel'	=> 4,
-		'env'		=> Kohana::DEVELOPMENT,
+		'env'		=> Kohana::TESTING,
 		'cdn'		=> array(
-			'blah.co.uk/assets',
-			'blah.co.uk/assets',
-			'blah.co.uk/assets'
+			'blah.co.uk/a1',
+			'blah.co.uk/a2',
+			'blah.co.uk/a3'
 			)
 		)
 );
