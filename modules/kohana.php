@@ -10,8 +10,8 @@ class Kohana extends Kohana_Core
 	/**
 	 * Debug constant
 	 */
-	const DEBUG_SILENT = 1;
-	const DEBUG_EXPLICIT = 2;
+	const DEBUG_JSON = 1;
+	const DEBUG_HTML = 2;
 
 	/**
 	 * Components tree

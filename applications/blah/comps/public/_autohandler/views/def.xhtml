@@ -5,12 +5,11 @@
 		<div tal:replace="structure comp: /footer"/>
     </div>
 	<script tal:replace="structure comp: /scripts"/>
-	<dl tal:condition="debug/explicit" tal:replace="structure comp: /debug debug"/>
+	<tal:block tal:condition="debug/html | debug/json" tal:replace="structure comp: /debug debug"/>
 </tal:block>
 <tal:block metal:fill-slot="head">
 	<title i18n:translate="">Hello World!</title>
 	<link tal:replace="structure comp: /stylesheets"/>
-	<meta tal:condition="debug/silent" tal:replace="structure comp: /debug debug"/>
 </tal:block>
 <html xmlns:i18n="http://xml.zope.org/namespaces/i18n" xmlns:tal="http://xml.zope.org/namespaces/tal">
     <head metal:define-slot="head"/>

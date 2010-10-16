@@ -49,10 +49,11 @@
 			$debug['data'] = array(
 				'app_environment' => Kohana::$environment,
 				'app_local' => Kohana::$locale,
-				'app_channel' => Kohana::$channel
+				'app_channel' => Kohana::$channel,
+				'tree' => Kohana::$tree
 				);
-			$debug['silent'] = Kohana::$debug === Kohana::DEBUG_SILENT;
-			$debug['explicit'] = Kohana::$debug === Kohana::DEBUG_EXPLICIT;
+			$debug['json'] = Kohana::$debug === Kohana::DEBUG_JSON;
+			$debug['html'] = Kohana::$debug === Kohana::DEBUG_HTML;
 		}
 
 		]]>

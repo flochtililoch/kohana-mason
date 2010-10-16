@@ -5,6 +5,14 @@
 		if(is_array($this->request->args))
 		{
 			$debug = array_shift($this->request->args);
+			if($debug['json'] === TRUE)
+			{
+				$debug['data'] = json_encode($debug['data']);
+			}
+			else
+			{
+				$debug['data'] = var_export($debug['data'], TRUE);
+			}
 		}
 		]]>
 	</php>
