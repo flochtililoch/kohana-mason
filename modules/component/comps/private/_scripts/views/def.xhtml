@@ -1,1 +1,1 @@
-<script type="text/javascript" tal:repeat="script request/get_scripts" tal:attributes="src string:${protocol}://${script/host | request/cdn/0}/${script/file}.js"/>
+<script type="text/javascript" tal:repeat="script request/get_scripts" tal:attributes="src string:${protocol}://${script/host}/${script/file}.js"/>
