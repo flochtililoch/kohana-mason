@@ -456,7 +456,7 @@ class Kohana extends Kohana_Core
 		if($namespace === NULL)
 		{
 			// Default Namespace
-			$namespace = APPNAME.'_'.Kohana::$locale.'_'.Kohana::$channel;
+			$namespace = APPNAME.'_'.Kohana::$locale.'_'.Kohana::$channel.'_'.Kohana::$environment;
 		}
 		
 		$name = $namespace.$name;

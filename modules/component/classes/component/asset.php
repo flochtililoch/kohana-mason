@@ -148,7 +148,7 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Request::CDN($filename),
+					'host' => Kohana::CDN($filename),
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
@@ -179,7 +179,7 @@ class Component_Asset
 				}
 
 				// Replace relative URLs into absolute if CDNs provided
-				if(count(Request::instance()->cdn))
+				if(count(Kohana::$cdn))
 				{
 					// convert relative urls into absolute urls within url() statements
 					// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
