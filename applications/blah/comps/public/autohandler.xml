@@ -50,7 +50,8 @@
 				'app_environment' => Kohana::$environment,
 				'app_local' => Kohana::$locale,
 				'app_channel' => Kohana::$channel,
-				'tree' => Kohana::$tree
+				'tree' => Kohana::$tree,
+				'resources' => Kohana::$resources
 				);
 			$debug['json'] = Kohana::$debug === Kohana::DEBUG_JSON;
 			$debug['html'] = Kohana::$debug === Kohana::DEBUG_HTML;
@@ -61,7 +62,6 @@
 	<process>
 		<key name="logged_in" context="global">$logged_in</key>
 		<key name="login_failed" context="global">$login_failed</key>
-		<key name="cdn">Request::$instance->cdn</key>
 		<key name="debug">$debug</key>
 	</process>
 </comp>
