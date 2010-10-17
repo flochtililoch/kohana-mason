@@ -410,8 +410,8 @@ class Component_Core
 				$directory = $entity[1];
 			    $controller = $entity[2];
 				$entity_type = $entity[3];
-				$entity_file = $entity[4];
-			
+				$entity_file = $entity[4].($entity_type === 'images' ? '.'.$entity[5] : '');
+
 				// All non-defaults resources are retrieved and indexed using their file name as key under 'user' array
 				$entity_path = 'user';
 				$entity_key = $entity_file;
