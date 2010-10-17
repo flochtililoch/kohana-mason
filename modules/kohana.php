@@ -88,6 +88,31 @@ class Kohana extends Kohana_Core
 	public static $channel = 1;
 	
 	/**
+	 * CDNs
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $cdn = array();
+	
+	/**
+	 * Index used to spread CDNs over resources
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $cdn_idx = NULL;
+		
+	/**
+	 * Cache storing resources and their corresponding CDN
+	 * Used by all components
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static $resources = array();
+	
+	/**
 	 * Include paths that are used to find files
 	 * before init paths modification
 	 *
@@ -140,11 +165,12 @@ class Kohana extends Kohana_Core
 			$sites = Kohana::load(APPSPATH.'sites.php');
 			$application = $sites[$_SERVER['SERVER_NAME']];
 			
-			// define application name, environment, locale & channel
+			// define application name, environment, locale, channel & CDNs
 			define('APPNAME', $application['appname']);
 			Kohana::$environment = $application['env'];
 			Kohana::$locale = $application['locale'];
 			Kohana::$channel = $application['channel'];
+			Kohana::$cdn =  $application['cdn'];
 		}
 		// Access from CLI
 		else
@@ -328,6 +354,12 @@ class Kohana extends Kohana_Core
 				Kohana::cache('tree', Kohana::$tree, 0);
 			}
 	    }
+	
+		// Load Resources
+		if(! (Kohana::$caching === TRUE && Kohana::$resources = Kohana::cache('resources')) )
+		{
+			Kohana::$resources = array();
+	    }
 
 		// Stop benchmarking
 		if(isset($benchmark))
@@ -340,9 +372,6 @@ class Kohana extends Kohana_Core
         if(Kohana::$is_cli === FALSE)
 		{
 			$request = Request::instance();
-			
-			// Store CDN information into the request
-			$request->cdn = $application['cdn'];
 			
 			// Process the whole request
 			$response = (string) $request->execute();
@@ -497,6 +526,36 @@ class Kohana extends Kohana_Core
 	}
 	
 	/**
+	 * Returns which CDN to use for a given resource
+	 * CDNs can be spread among over resources to help parallel download
+	 * Each resource can have just one CDN as well
+	 *
+	 * @param	string	resource
+	 * @return	string	CDN to be used
+	 * @access	public
+	 */
+	public static function CDN($res)
+	{
+		// We should have at least one CDN defined in the list
+		if(!count(Kohana::$cdn))
+		{
+			return FALSE;
+		}
+		// If this resource already has associated CDN, don't reprocess
+		if(!array_key_exists($res, Kohana::$resources))
+		{
+			// Shift to the next CDN in the list
+			Kohana::$cdn_idx = (Kohana::$cdn_idx !== NULL && (Kohana::$cdn_idx < (count(Kohana::$cdn) - 1)) ? Kohana::$cdn_idx + 1 : 0);
+			
+			// Cache processed resource
+			Kohana::$resources[$res] = Kohana::$cdn_idx;
+		}
+		
+		// Return the CDN to be used
+		return Kohana::$cdn[Kohana::$resources[$res]];
+	}
+	
+	/**
 	 * Shutdown application
 	 *
 	 * @uses    Kohana::exception_handler
@@ -522,6 +581,11 @@ class Kohana extends Kohana_Core
 			system(sprintf($cmd, CACHEPATH.'kohana'));
 			system(sprintf($cmd, CACHEPATH.'views'));
 			Cache::instance()->delete_all();
+		}
+		else
+		{
+		    // resources cache never expire
+			Kohana::cache('resources', Kohana::$resources, 0);
 		}
 		
 		// Kohana default shutdown

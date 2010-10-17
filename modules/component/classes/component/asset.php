@@ -22,28 +22,6 @@ class Component_Asset
 	 * @access	public
 	 */
 	public static $config = NULL;
-
-	/**
-	 * Index used to spread CDNs over resources
-	 *
-	 * @access	private
-	 */
-	private $_cdn_idx = NULL;
-	
-	/**
-	 * Key used to retrieve cached resources and their corresponding CDN
-	 *
-	 * @access	private
-	 */
-	private $_resources_cache_key = NULL;
-	
-	/**
-	 * Cache storing resources and their corresponding CDN
-	 * Used by all components
-	 *
-	 * @access	private
-	 */
-	private $_resources = array();
 	
 	/**
 	 * Asset main instance
@@ -56,12 +34,6 @@ class Component_Asset
 		if(Asset::$instance === NULL)
 		{
 			Asset::$instance = new Asset();
-			Asset::$instance->_resources_cache_key = 'assets_ressources_'.Kohana::$environment.'_'.Kohana::$locale.'_'.Kohana::$locale.'_'.Kohana::$channel;
-			Asset::$instance->_resources = Kohana::cache(Asset::$instance->_resources_cache_key);
-			if(Asset::$instance->_resources === NULL)
-			{
-				Asset::$instance->_resources = array();
-			}
 		}
 		return Asset::$instance;
 	}
@@ -79,36 +51,6 @@ class Component_Asset
 			Asset::$config = Kohana::config('asset');
 		}
 		return Asset::$config;
-	}
-
-	/**
-	 * Returns which CDN to use for a given resource
-	 * CDNs can be spread among over resources to help parallel download
-	 * Each resource can have just one CDN as well
-	 *
-	 * @param	string	resource
-	 * @return	string	CDN to be used
-	 * @access	public
-	 */
-	public static function CDN($res)
-	{
-		// We should have at least one CDN defined in the list
-		if(!count(Request::instance()->cdn))
-		{
-			return FALSE;
-		}
-		// If this resource already has associated CDN, don't reprocess
-		if(!array_key_exists($res, Asset::$instance->_resources))
-		{
-			// Shift to the next CDN in the list
-			Asset::$instance->_cdn_idx = (Asset::$instance->_cdn_idx !== NULL && (Asset::$instance->_cdn_idx < (count(Request::instance()->cdn) - 1)) ? Asset::$instance->_cdn_idx + 1 : 0);
-			
-			// Cache processed resource
-			Asset::$instance->_resources[$res] = Asset::$instance->_cdn_idx;
-		}
-		
-		// Return the CDN to be used
-		return Request::instance()->cdn[Asset::$instance->_resources[$res]];
 	}
 	
 	/**
@@ -163,7 +105,7 @@ class Component_Asset
 				foreach($used_entities as $entity)
 				{
 					// Find which CDN to use
-					$cdn = property_exists($comp, 'cdn') ? Request::$instance->cdn[$comp::$cdn] : Asset::CDN($path.'/'.$type.'/'.$entity['name']);
+					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::CDN($path.'/'.$type.'/'.$entity['name']);
 
 					$files = array_replace_recursive($files, array(
 						$type => array(
@@ -206,7 +148,7 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Asset::CDN($filename),
+					'host' => Request::CDN($filename),
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
@@ -245,7 +187,7 @@ class Component_Asset
 													'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
 													create_function(
 														'$matches',
-														'return ":".$matches[1]."url(".$matches[2].Asset::CDN($matches[3]).$matches[3].$matches[2].")";'
+														'return ":".$matches[1]."url(".$matches[2].Kohana::CDN($matches[3]).$matches[3].$matches[2].")";'
 														),
 													$packed[$type][$cache_key]
 													);
@@ -255,7 +197,7 @@ class Component_Asset
 													'/src="(.*?)"/',
 													create_function(
 														'$matches',
-														'return "src=\"".Asset::CDN($matches[1]).$matches[1]."\"";'
+														'return "src=\"".Kohana::CDN($matches[1]).$matches[1]."\"";'
 														),
 													$packed[$type][$cache_key]
 													);
