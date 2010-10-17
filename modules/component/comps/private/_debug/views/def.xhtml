@@ -1,4 +1,4 @@
 <script type="text/javascript" tal:condition="debug/json">
 	console.log(<tal:block tal:replace="structure debug/data"/>);
 </script>
-<pre tal:condition="debug/html" tal:content="structure debug/data"/>
+<pre tal:condition="debug/html" tal:content="structure dump: debug/data"/>
