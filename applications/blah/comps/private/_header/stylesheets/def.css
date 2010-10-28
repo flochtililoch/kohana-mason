@@ -1,3 +1,7 @@
+#header
+{
+	background:url(../images/header-bg.png);
+}
 #login, #header .menu
 {
 	float:left;
