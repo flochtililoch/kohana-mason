@@ -144,11 +144,11 @@ class Component_Asset
 			{
 				// File name is a hash of serialized entities
 				$filename = sha1(serialize($files));
-				$file = Asset::config()->dest.$filename.'.'.Asset::config()->types[$type];
+				$file = Asset::config()->dest.$filename.'.'.$file_extension;
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Kohana::CDN($filename),
+					'host' => Kohana::CDN($filename.'.'.$file_extension),
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
