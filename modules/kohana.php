@@ -531,16 +531,35 @@ class Kohana extends Kohana_Core
 	 * Each resource can have just one CDN as well
 	 *
 	 * @param	string	resource
+	 * @param	boolean	flag to enforce file presence
 	 * @return	string	CDN to be used
 	 * @access	public
 	 */
-	public static function CDN($res)
+	public static function CDN($res, $file_exists = TRUE)
 	{
 		// We should have at least one CDN defined in the list
 		if(!count(Kohana::$cdn))
 		{
 			return FALSE;
 		}
+
+		// If file presence is mandatory, get its realpath
+		if($file_exists === TRUE)
+		{
+			preg_match('/(.*)\.(.*)$/', $res, $matches);
+			$res = Kohana::find_file('comps', $matches[1], $matches[2]);
+			if($res !== FALSE)
+			{
+				$res = realpath($res);
+			}
+			else
+			{
+				throw new Kohana_View_Exception('The requested asset file :file could not be found', array(
+					':file' => $matches[1].'.'.$matches[2],
+				));
+			}
+		}
+		
 		// If this resource already has associated CDN, don't reprocess
 		if(!array_key_exists($res, Kohana::$resources))
 		{

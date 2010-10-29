@@ -105,7 +105,7 @@ class Component_Asset
 				foreach($used_entities as $entity)
 				{
 					// Find which CDN to use
-					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::CDN($path.'/'.$type.'/'.$entity['name']);
+					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::CDN($path.'/'.$type.'/'.$entity['name'].'.'.Asset::config()->types[$type]);
 
 					$files = array_replace_recursive($files, array(
 						$type => array(
@@ -148,7 +148,7 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Kohana::CDN($filename.'.'.$file_extension),
+					'host' => Kohana::CDN($filename.'.'.$file_extension, FALSE),
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
@@ -168,39 +168,48 @@ class Component_Asset
 			{
 				foreach($files as $file)
 				{
-					// get current file realpath
-					$file = Kohana::find_file('comps', $file['file'], Asset::config()->types[$type]);
+					// Save current file relative path
+					$file_relative_path = $file['file'];
+					
+					// Get current file absolute path
+					$file = Kohana::find_file('comps', $file_relative_path, Asset::config()->types[$type]);
 
 					// get file last modification time
 					$_files[$file] = filemtime($file);
+					
+					// Get file content
+					$content = file_get_contents($file);
+
+					// Replace relative URLs into absolute if CDNs provided
+					if(count(Kohana::$cdn))
+					{
+						// Get relative path (without filename)
+						$path = preg_replace('/(.*\/)(.*)$/', '$1', $file_relative_path);
+					
+						// convert relative urls into absolute urls within url() statements
+						// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
+						$content = preg_replace_callback(
+														'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
+														create_function(
+															'$matches',
+															'return ":".$matches[1]."url(".$matches[2].Kohana::CDN("'.$path.'".$matches[3]).$matches[3].$matches[2].")";'
+															),
+														$content
+														);
+
+						// convert relative urls into absolute urls within src="" statements
+						$content = preg_replace_callback(
+														'/src="(.*?)"/',
+														create_function(
+															'$matches',
+															'return "src=\"".Kohana::CDN("'.$path.'".$matches[1]).$matches[1]."\"";'
+															),
+														$content
+														);
+					}
 
 					// concat file content with other same type files
-					$packed[$type][$cache_key] .= file_get_contents($file);					
-				}
-
-				// Replace relative URLs into absolute if CDNs provided
-				if(count(Kohana::$cdn))
-				{
-					// convert relative urls into absolute urls within url() statements
-					// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
-					$packed[$type][$cache_key] = preg_replace_callback(
-													'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
-													create_function(
-														'$matches',
-														'return ":".$matches[1]."url(".$matches[2].Kohana::CDN($matches[3]).$matches[3].$matches[2].")";'
-														),
-													$packed[$type][$cache_key]
-													);
-
-					// convert relative urls into absolute urls within src="" statements
-					$packed[$type][$cache_key] = preg_replace_callback(
-													'/src="(.*?)"/',
-													create_function(
-														'$matches',
-														'return "src=\"".Kohana::CDN($matches[1]).$matches[1]."\"";'
-														),
-													$packed[$type][$cache_key]
-													);
+					$packed[$type][$cache_key] .= $content;
 				}
 
 				$filename = key($packed_files[$type][$cache_key]).'.'.Asset::config()->types[$type];
