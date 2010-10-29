@@ -19,6 +19,11 @@ class Component_I18n
 	public static $lang = NULL;
 	
 	/**
+	 * @var  string  source language: en-us, es-es, zh-cn, etc
+	 */
+	public static $source = 'en-us';
+	
+	/**
      * Main translator singleton instance
 	 *
 	 * @param	string	locale
@@ -55,15 +60,17 @@ class Component_I18n
 	 * @access	public
 	 * @static
 	 */
-	public static function init($locale = NULL, $channel = NULL)
+	public static function init($locale = NULL, $channel = NULL, $source = NULL)
 	{
+		I18n::channel($channel);
+		I18n::source($source);
+		
 	    // If locale string is well formed
         if(preg_match('/^([a-z]{2})_([A-Z]{2})$/', $locale, $i18n))
         {
 			I18n::locale($locale);
             I18n::language($i18n[1]);
             I18n::country($i18n[2]);
-            I18n::channel($channel);
             
             // NOTICE : for compatibility purpose
             I18n::$lang = I18n::language().'-'.I18n::country();
@@ -157,6 +164,23 @@ class Component_I18n
 	        I18n::$_channel = $channel;
 	    }
 		return I18n::$_channel;
+	}
+	
+	/**
+	 * Get and set the source language.
+	 *
+	 * @param   string   new source setting
+	 * @return  string
+	 * @access	public
+	 * @static
+	 */
+	public static function source($source = NULL)
+	{
+	    if($source !== NULL)
+	    {
+	        I18n::$source = $source;
+	    }
+		return I18n::$source;
 	}
 	
 	/**

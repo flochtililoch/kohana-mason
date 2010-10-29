@@ -340,7 +340,7 @@ class Kohana extends Kohana_Core
 		}
 
 		// Init Locale and Channel
-		I18n::init(Kohana::$locale, Kohana::$channel);
+		I18n::init(Kohana::$locale, Kohana::$channel, $settings['i18n_source']);
 		
 		// Load Components tree
 		if(! (Kohana::$caching === TRUE && Kohana::$tree = Kohana::cache('tree')) )

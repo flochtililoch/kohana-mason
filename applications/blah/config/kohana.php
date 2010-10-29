@@ -3,6 +3,7 @@
 return array
 (
 	'timezone'		=> 'Europe/Paris',			// Server Timezone
+	'i18n_source'	=> 'en-gb',					// Default language used in templates
 	'debug'			=> Kohana::DEBUG_JSON,		// Set level of debug (FALSE = disabled, Kohana::DEBUG_JSON, Kohana::DEBUG_HTML)
 	'caching'		=> FALSE,					// Enable or disable internal caching
 	'profile'		=> TRUE,					// Enable or disable internal profiling
