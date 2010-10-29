@@ -39,7 +39,7 @@ class Component_Controller extends Kohana_Controller
 			$path = $comp::$_path.'/'.$comp::$_directory.'_'.$comp::$_name;
 
 			// If the combination of assets for this type of execution has not been cached yet
-			if(! (Kohana::$caching === TRUE && $assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) )
+			if(! (Kohana::$caching === TRUE && ($assets = Kohana::cache('assets_'.$path.'_'.$comp::$_assets_cache_key)) !== NULL) )
 			{
 				// Load assets for this specific component
 				$assets = Asset::instance()->load($comp);
