@@ -45,39 +45,39 @@ a
 	width:600px;
 	margin-left:auto;
 	margin-right:auto;
-	background:url(/images/test.jpg);
+	background:url(../images/test.png);
 }
 #test
 {
-	background:url(/images/blabla.jpg);
-	background:url(/images/blabla2.jpg);
-	background:url(/images/blabla2.jpg);
-	background:url(/images/blabla3.jpg);
-	background:url(/images/blabla.jpg);
-	background:url(/images/blabla3.jpg);
-	background:url(/assets/images/default/global/more_open.png);
-	background:url(/images/blabla3.jpg);
-	background:url(/images/blabla.jpg);
-	background:url(/images/blabla3.jpg);
+	background:url(../images/blabla.png);
+	background:url(../images/blabla2.png);
+	background:url(../images/blabla2.png);
+	background:url(../images/blabla3.png);
+	background:url(../images/blabla.png);
+	background:url(../images/blabla3.png);
+	background:url(../images/more_open.png);
+	background:url(../images/blabla3.png);
+	background:url(../images/blabla.png);
+	background:url(../images/blabla3.png);
 }
 
 .logo img
 {
-	behavior:url(/assets/js/iepngfix.htc);
-	-ms-behavior:url(/assets/js/iepngfix.htc);
+	behavior:url(../assets/js/iepngfix.htc);
+	-ms-behavior:url(../assets/js/iepngfix.htc);
 }
 
 #thes_more:hover, #thes_more.hover
 {
 	background:none;
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/assets/images/default/global/more_open.png",sizingMethod="crop");
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/images/blabla2.jpg",sizingMethod="crop");
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/images/blabla3.jpg",sizingMethod="crop");
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/images/blabla.jpg",sizingMethod="crop");
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/assets/images/default/global/more_open.png",sizingMethod="crop");
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/more_open.png",sizingMethod="crop");
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/blabla2.png",sizingMethod="crop");
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/blabla3.png",sizingMethod="crop");
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/blabla.png",sizingMethod="crop");
+	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src="../images/more_open.png",sizingMethod="crop");
 }
 @font-face
 {
-	font-family: "Calibri";
-	src: url('../font/calibri.ttf');
+	font-family: "InaiMathi";
+	src: url('../fonts/InaiMathi.ttf');
 }
