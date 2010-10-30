@@ -28,7 +28,7 @@ class Component_Request extends Kohana_Request
      *
 	 * @access	public
 	 */
-    public $assets = array(
+	public $assets = array(
 		'scripts' => array(),
 		'stylesheets' => array()
 		);
@@ -148,15 +148,13 @@ class Component_Request extends Kohana_Request
 
 		if(! (Kohana::$caching === TRUE && $assets = Kohana::cache($assets_key)) )
 		{
+			// Development and Staging environments loads unpacked assets
+			$files = array($type => Request::$instance->assets[$type]);
+			
 			// Testing and Production environments loads packed assets
 			if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
 			{
-				$files = Asset::instance()->pack(Request::$instance->assets);
-			}
-			// Development and Staging environments loads unpacked assets
-			else
-			{
-				$files = Request::$instance->assets;
+				$files = Asset::instance()->pack($files);
 			}
 			
 			// Flatern assets array
