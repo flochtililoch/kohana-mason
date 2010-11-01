@@ -1,5 +1,3 @@
 <comp>
-	<process>
-		<key name="protocol">Request::$protocol</key>
-	</process>
+	<process/>
 </comp>
