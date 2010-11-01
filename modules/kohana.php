@@ -526,31 +526,37 @@ class Kohana extends Kohana_Core
 	}
 	
 	/**
-	 * Returns which CDN to use for a given resource
-	 * CDNs can be spread among over resources to help parallel download
-	 * Each resource can have just one CDN as well
+	 * Returns a resource object for a given resource path
+	 * contains :
+	 *	cdn index key, used to spread resources across cdns to help parallel download
+	 * 	resource given path or realpath if required
 	 *
-	 * @param	string	resource
+	 * @param	string	resource path
 	 * @param	boolean	flag to enforce file presence
-	 * @return	string	CDN to be used
+	 * @return	resource object
 	 * @access	public
 	 */
-	public static function CDN($res, $file_exists = TRUE)
+	public static function resource($res_path, $file_exists = FALSE)
 	{
 		// We should have at least one CDN defined in the list
 		if(!count(Kohana::$cdn))
 		{
 			return FALSE;
 		}
-
+		
+		$realpath = NULL;
+		
 		// If file presence is mandatory, get its realpath
 		if($file_exists === TRUE)
 		{
-			preg_match('/(.*)\.(.*)$/', $res, $matches);
-			$res = Kohana::find_file('comps', $matches[1], $matches[2]);
-			if($res !== FALSE)
+			preg_match('/(.*)\.(.*)$/', $res_path, $matches);
+			$path = Kohana::find_file('comps', $matches[1], $matches[2]);
+			
+			if($path !== FALSE)
 			{
-				$res = realpath($res);
+				// Extract the relative realpath
+				$realpath = realpath($path);
+				$res_path = str_replace(str_replace($res_path, '', $path), '', $realpath);
 			}
 			else
 			{
@@ -561,17 +567,23 @@ class Kohana extends Kohana_Core
 		}
 		
 		// If this resource already has associated CDN, don't reprocess
-		if(!array_key_exists($res, Kohana::$resources))
+		if(!array_key_exists($res_path, Kohana::$resources))
 		{
 			// Shift to the next CDN in the list
 			Kohana::$cdn_idx = (Kohana::$cdn_idx !== NULL && (Kohana::$cdn_idx < (count(Kohana::$cdn) - 1)) ? Kohana::$cdn_idx + 1 : 0);
 			
+			// Set resource object keys
+			$res = new StdClass();
+			$res->path = $res_path;
+			$res->realpath = $realpath;
+			$res->cdn = Kohana::$cdn[Kohana::$cdn_idx];
+			
 			// Cache processed resource
-			Kohana::$resources[$res] = Kohana::$cdn_idx;
+			Kohana::$resources[$res_path] = $res;
 		}
 		
-		// Return the CDN to be used
-		return Kohana::$cdn[Kohana::$resources[$res]];
+		// Return the resource object
+		return Kohana::$resources[$res_path];
 	}
 	
 	/**

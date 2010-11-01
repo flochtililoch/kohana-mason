@@ -105,7 +105,7 @@ class Component_Asset
 				foreach($used_entities as $entity)
 				{
 					// Find which CDN to use
-					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::CDN($path.'/'.$type.'/'.$entity['name'].'.'.Asset::config()->types[$type]);
+					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::resource($path.'/'.$type.'/'.$entity['name'].'.'.Asset::config()->types[$type])->cdn;
 
 					$files = array_replace_recursive($files, array(
 						$type => array(
@@ -148,7 +148,7 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Kohana::CDN($filename.'.'.$file_extension, FALSE),
+					'host' => Kohana::resource($filename.'.'.$file_extension)->cdn,
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
@@ -185,24 +185,30 @@ class Component_Asset
 					{
 						// Get relative path (without filename)
 						$path = preg_replace('/(.*\/)(.*)$/', '$1', $file_relative_path);
-					
+						
 						// convert relative urls into absolute urls within url() statements
 						// NOTE : path specified in behavior (& -ms-behavior) property need to be relative. Therefore it should not be modified
 						$content = preg_replace_callback(
 														'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
 														create_function(
 															'$matches',
-															'return ":".$matches[1]."url(".$matches[2].Kohana::CDN("'.$path.'".$matches[3]).$matches[3].$matches[2].")";'
+															'$res = Kohana::resource("'.$path.'".$matches[3], TRUE);
+															$res_path = sha1($res->realpath.filemtime($res->realpath));
+															copy($res->realpath, "'.Asset::config()->dest.'".$res_path);
+															return ":".$matches[1]."url(".$matches[2].$res->cdn.$res_path.$matches[2].")";'
 															),
 														$content
 														);
 
 						// convert relative urls into absolute urls within src="" statements
 						$content = preg_replace_callback(
-														'/src="(.*?)"/',
+														'/src="()()(.*?)()"/',
 														create_function(
 															'$matches',
-															'return "src=\"".Kohana::CDN("'.$path.'".$matches[1]).$matches[1]."\"";'
+															'$res = Kohana::resource("'.$path.'".$matches[3], TRUE);
+															$res_path = sha1($res->realpath.filemtime($res->realpath));
+															copy($res->realpath, "'.Asset::config()->dest.'".$res_path);
+															return "src=\"".$res->cdn.$res_path."\"";'
 															),
 														$content
 														);
