@@ -48,11 +48,10 @@ function phptal_tales_comp($paths, $nothrow)
 /**
  * Load an asset file
  */
-function phptal_asset($src, $nothrow)
+function phptal_tales_asset($src, $nothrow)
 {
-	return '\''.I18n::instance()->uri($src).'\'';
+	return '\''.Kohana::resource($src).'\'';
 }
-
 
 /**
  * Translate an URI

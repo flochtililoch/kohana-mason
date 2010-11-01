@@ -526,6 +526,42 @@ class Kohana extends Kohana_Core
 	}
 	
 	/**
+	 * Retrieves assets for the main request
+	 *
+	 * @param	string	asset type
+	 * @return  array   assets files list
+	 */
+	public static function assets($type)
+	{
+		$assets_key = 'assets_'.$type.'_'.sha1(serialize(Request::$instance->assets));
+
+		if(! (Kohana::$caching === TRUE && $assets = Kohana::cache($assets_key)) )
+		{
+			// Development and Staging environments loads unpacked assets
+			$files = array($type => Request::$instance->assets[$type]);
+			
+			// Testing and Production environments loads packed assets
+			if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
+			{
+				$files = Asset::instance()->pack($files);
+			}
+			
+			// Flatern assets array
+			$assets = array();
+			foreach(array_keys($files[$type]) as $cache_key)
+			{
+				$assets += $files[$type][$cache_key];
+			}
+
+			if(Kohana::$caching === TRUE)
+			{
+				Kohana::cache($assets_key, $assets);
+			}
+		}
+		return $assets;
+	}
+	
+	/**
 	 * Returns a resource object for a given resource path
 	 * contains :
 	 *	cdn index key, used to spread resources across cdns to help parallel download
@@ -536,7 +572,7 @@ class Kohana extends Kohana_Core
 	 * @return	resource object
 	 * @access	public
 	 */
-	public static function resource($res_path, $file_exists = FALSE)
+	public static function resource($path, $file_exists = TRUE)
 	{
 		// We should have at least one CDN defined in the list
 		if(!count(Kohana::$cdn))
@@ -544,46 +580,53 @@ class Kohana extends Kohana_Core
 			return FALSE;
 		}
 		
-		$realpath = NULL;
-		
-		// If file presence is mandatory, get its realpath
-		if($file_exists === TRUE)
-		{
-			preg_match('/(.*)\.(.*)$/', $res_path, $matches);
-			$path = Kohana::find_file('comps', $matches[1], $matches[2]);
-			
-			if($path !== FALSE)
-			{
-				// Extract the relative realpath
-				$realpath = realpath($path);
-				$res_path = str_replace(str_replace($res_path, '', $path), '', $realpath);
-			}
-			else
-			{
-				throw new Kohana_View_Exception('The requested asset file :file could not be found', array(
-					':file' => $matches[1].'.'.$matches[2],
-				));
-			}
-		}
-		
 		// If this resource already has associated CDN, don't reprocess
-		if(!array_key_exists($res_path, Kohana::$resources))
+		if(!array_key_exists($path, Kohana::$resources))
 		{
 			// Shift to the next CDN in the list
 			Kohana::$cdn_idx = (Kohana::$cdn_idx !== NULL && (Kohana::$cdn_idx < (count(Kohana::$cdn) - 1)) ? Kohana::$cdn_idx + 1 : 0);
 			
+			$realpath = NULL;
+			$newpath = $path;
+
+			// If file presence is mandatory, get its realpath
+			if($file_exists === TRUE)
+			{
+				preg_match('/(.*)\.(.*)$/', $path, $matches);
+				$tmp_rel_path = Kohana::find_file('comps', $matches[1], $matches[2]);
+
+				if($tmp_rel_path !== FALSE)
+				{
+					// Extract the relative realpath
+					$realpath = realpath($tmp_rel_path);
+					$path = str_replace(str_replace($path, '', $tmp_rel_path), '', $realpath);
+
+					if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
+					{
+						$newpath = sha1($realpath.filemtime($realpath));
+						copy($realpath, Asset::config()->dest.$newpath);
+					}
+				}
+				else
+				{
+					throw new Kohana_View_Exception('The requested asset file :file could not be found', array(
+						':file' => $matches[1].'.'.$matches[2],
+					));
+				}
+			}
+			
 			// Set resource object keys
 			$res = new StdClass();
-			$res->path = $res_path;
-			$res->realpath = $realpath;
+			$res->path = $newpath;
 			$res->cdn = Kohana::$cdn[Kohana::$cdn_idx];
+			$res->realpath = $realpath;
 			
 			// Cache processed resource
-			Kohana::$resources[$res_path] = $res;
+			Kohana::$resources[$path] = $res;
 		}
-		
+
 		// Return the resource object
-		return Kohana::$resources[$res_path];
+		return Kohana::$resources[$path];
 	}
 	
 	/**

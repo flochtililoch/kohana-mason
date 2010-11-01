@@ -108,7 +108,7 @@ class Component_Controller extends Kohana_Controller
 	 * @return	Array of properties
 	 * @access	public
 	 */
-	public static function get_context($comp)
+	public static function context($comp)
 	{
 		return array(
 			'path'				=> $comp::$_path,
@@ -118,6 +118,22 @@ class Component_Controller extends Kohana_Controller
 			'assets'			=> $comp::$_assets,
 			'assets_cache_key'	=> $comp::$_assets_cache_key
 			);
+	}
+	
+	/**
+	 * Stylesheets helper
+	 */
+	public function stylesheets()
+	{
+		return Kohana::assets('stylesheets');
+	}
+	
+	/**
+	 * Scripts helper
+	 */
+	public function scripts()
+	{
+		return Kohana::assets('scripts');
 	}
 	
 }	// End Component_Controller

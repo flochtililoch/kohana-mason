@@ -63,7 +63,7 @@ class Component_Asset
 	public function load($comp)
 	{
 		// Load component context
-		$context = Controller::get_context($comp);
+		$context = Controller::context($comp);
 		
 		// Work with controller's entities only
 		$entities = Kohana::$tree['comps'][$context['path']][$context['directory']][$context['name']];
@@ -105,7 +105,7 @@ class Component_Asset
 				foreach($used_entities as $entity)
 				{
 					// Find which CDN to use
-					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::resource($path.'/'.$type.'/'.$entity['name'].'.'.Asset::config()->types[$type])->cdn;
+					$cdn = property_exists($comp, 'cdn') ? Kohana::$cdn[$comp::$cdn] : Kohana::resource($path.'/'.$type.'/'.$entity['name'].'.'.Asset::config()->types[$type], FALSE)->cdn;
 
 					$files = array_replace_recursive($files, array(
 						$type => array(
@@ -148,7 +148,7 @@ class Component_Asset
 				$cache_id = file_exists($file) ? filemtime($file) : NULL;
 
 				$packed_files[$type][$group] = array($filename => array(
-					'host' => Kohana::resource($filename.'.'.$file_extension)->cdn,
+					'host' => Kohana::resource($filename.'.'.$file_extension, FALSE)->cdn,
 					'file' => $filename,
 					'cache_id' => $cache_id
 					));
@@ -192,10 +192,8 @@ class Component_Asset
 														'/(?<!behavior):(.*)?url\((["\'])?(.*[^"\'])(["\'])?\)/',
 														create_function(
 															'$matches',
-															'$res = Kohana::resource("'.$path.'".$matches[3], TRUE);
-															$res_path = sha1($res->realpath.filemtime($res->realpath));
-															copy($res->realpath, "'.Asset::config()->dest.'".$res_path);
-															return ":".$matches[1]."url(".$matches[2].$res->cdn.$res_path.$matches[2].")";'
+															'$res = Kohana::resource("'.$path.'".$matches[3]);
+															return ":".$matches[1]."url(".$matches[2].$res->cdn.$res->path.$matches[2].")";'
 															),
 														$content
 														);
@@ -205,10 +203,8 @@ class Component_Asset
 														'/src="()()(.*?)()"/',
 														create_function(
 															'$matches',
-															'$res = Kohana::resource("'.$path.'".$matches[3], TRUE);
-															$res_path = sha1($res->realpath.filemtime($res->realpath));
-															copy($res->realpath, "'.Asset::config()->dest.'".$res_path);
-															return "src=\"".$res->cdn.$res_path."\"";'
+															'$res = Kohana::resource("'.$path.'".$matches[3]);
+															return "src=\"".$res->cdn.$res->path."\"";'
 															),
 														$content
 														);
