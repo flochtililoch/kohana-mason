@@ -3,6 +3,7 @@
 		<div tal:replace="structure comp: /header"/>
     	<div tal:replace="structure after"/>
 		<div tal:replace="structure comp: /footer"/>
+		<img tal:attributes="src asset: public/_autohandler/images/more_open.png"/>
     </div>
 	<script tal:replace="structure comp: /scripts"/>
 	<tal:block tal:condition="debug/html | debug/json" tal:replace="structure comp: /debug debug"/>

@@ -593,6 +593,7 @@ class Kohana extends Kohana_Core
 			if($file_exists === TRUE)
 			{
 				preg_match('/(.*)\.(.*)$/', $path, $matches);
+
 				$tmp_rel_path = Kohana::find_file('comps', $matches[1], $matches[2]);
 
 				if($tmp_rel_path !== FALSE)
@@ -600,15 +601,26 @@ class Kohana extends Kohana_Core
 					// Extract the relative realpath
 					$realpath = realpath($tmp_rel_path);
 					$path = str_replace(str_replace($path, '', $tmp_rel_path), '', $realpath);
-
+					
 					if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
 					{
-						$newpath = sha1($realpath.filemtime($realpath));
+						$newpath = substr($path, 0, -1 * (strlen($matches[2])+1)).'-'.filemtime($realpath).'.'.$matches[2];
+						$dir = dirname(Asset::config()->dest.$newpath);
+						
+						// Create cache dir if not present
+						if(!is_dir($dir))
+						{
+							// Create directory
+							mkdir($dir, 0777, TRUE);
+
+							// Set permissions (must be manually set to fix umask issues)
+							chmod($dir, 0777);
+						}
 						copy($realpath, Asset::config()->dest.$newpath);
 					}
 				}
 				else
-				{
+				{var_dump($matches); die();
 					throw new Kohana_View_Exception('The requested asset file :file could not be found', array(
 						':file' => $matches[1].'.'.$matches[2],
 					));

@@ -46,11 +46,12 @@ function phptal_tales_comp($paths, $nothrow)
 }
 
 /**
- * Load an asset file
+ * Return a resource path
  */
-function phptal_tales_asset($src, $nothrow)
+function phptal_tales_asset($path, $nothrow)
 {
-	return '\''.Kohana::resource($src).'\'';
+	$res = Kohana::resource(trim($path));
+	return '\''.$res->cdn.$res->path.'\'';
 }
 
 /**
