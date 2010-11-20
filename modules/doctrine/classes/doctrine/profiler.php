@@ -21,7 +21,7 @@ class Doctrine_Profiler implements SqlLogger
 			if(!is_object(self::$log))
 			{
 				self::$log = Kohana_Log::instance();
-				self::$log->attach(new Kohana_Log_File(VARPATH . 'log/doctrine', array('PDO')));
+				self::$log->attach(new Kohana_Log_File(LOGPATH . 'doctrine', array('PDO')));
 			}
 			
 			// Add this query to the log

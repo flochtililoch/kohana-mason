@@ -152,6 +152,9 @@ class Kohana extends Kohana_Core
 		// Determine if we are running in a Windows environment
 		Kohana::$is_windows = (DIRECTORY_SEPARATOR === '\\');
 		
+		// Determine if we are running in safe mode
+		Kohana::$safe_mode = (bool) ini_get('safe_mode');
+		
 		// Enable the Kohana auto-loader
         spl_autoload_register(array('Kohana', 'auto_load'));
 
@@ -188,13 +191,41 @@ class Kohana extends Kohana_Core
 			$argv = array_values($_SERVER['argv']);
 		}
 		
-		// Define application, var & cache paths
+		// Define application path
 		define('APPPATH', realpath(APPSPATH.APPNAME).DIRECTORY_SEPARATOR);
-		define('VARPATH', realpath(APPPATH.'var').DIRECTORY_SEPARATOR);
-		define('CACHEPATH', realpath(VARPATH.'cache').DIRECTORY_SEPARATOR);
 		
+		// Load application core settings
+		$settings = Kohana::load(APPPATH.'config/kohana.php');
+		
+		// Define cache & log paths
+		define('CACHEPATH', realpath($settings['cache_dir']).DIRECTORY_SEPARATOR);		
+		define('LOGPATH', realpath($settings['log_dir']).DIRECTORY_SEPARATOR);
+		
+		// Create cache dir if not present
+		if(!is_dir(CACHEPATH.'kohana'))
+		{
+			// Create directory
+			mkdir(CACHEPATH.'kohana', 0777, TRUE);
+
+			// Set permissions (must be manually set to fix umask issues)
+			chmod(CACHEPATH.'kohana', 0777);
+		}
+		
+				
 		// Add Application path to global paths
 		array_unshift(Kohana::$_paths, APPPATH);
+		
+		// Set the default time zone
+        date_default_timezone_set($settings['timezone']);
+		
+		// Enable or disable internal caching
+		Kohana::$caching = (bool) $settings['caching'];
+		
+		// Set the default cache lifetime
+		Kohana::$cache_life = (int) $settings['cache_life'];
+		
+		// Enable or disable debug mode
+		Kohana::$debug = $settings['debug'];
 
 		// Load the files paths cache
 		if(Kohana::$caching === TRUE)
@@ -206,13 +237,10 @@ class Kohana extends Kohana_Core
 		Kohana::$config = Kohana_Config::instance()->attach(new Kohana_Config_File);
 		
 		// If deployment is running, stop here
-		if(is_file(VARPATH.'deploying-'.APPNAME))
+		if(is_file(CACHEPATH.'deploying-'.APPNAME))
 		{
 		    die('Back soon!');
 		}
-
-		// Load core settings
-		$settings = Kohana::config('kohana');
 
 		// Set profiling
 		if (isset($settings['profile']))
@@ -224,25 +252,6 @@ class Kohana extends Kohana_Core
 		if (Kohana::$profiling === TRUE)
 		{
 			$benchmark = Profiler::start('Kohana', __FUNCTION__);
-		}
-		
-		// Set the default time zone
-        date_default_timezone_set($settings['timezone']);
-		
-		// Enable or disable internal caching
-		Kohana::$caching = (bool) $settings['caching'];
-		
-		// Enable or disable debug mode
-		Kohana::$debug = $settings['debug'];
-
-		// Create cache dir if not present
-		if(!is_dir(CACHEPATH.'kohana'))
-		{
-			// Create directory
-			mkdir(CACHEPATH.'kohana', 0777, TRUE);
-
-			// Set permissions (must be manually set to fix umask issues)
-			chmod(CACHEPATH.'kohana', 0777);
 		}
 		
 		// Set the cache directory path
@@ -336,7 +345,7 @@ class Kohana extends Kohana_Core
 		if(isset($settings['logging']) && $settings['logging'] === TRUE)
 		{
 			Kohana::$logging = TRUE;
-			Kohana::$log->attach(new Kohana_Log_File(VARPATH . 'log/kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
+			Kohana::$log->attach(new Kohana_Log_File(LOGPATH . 'kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
 		}
 
 		// Init Locale and Channel
@@ -451,7 +460,7 @@ class Kohana extends Kohana_Core
 	 * @access	public
 	 * @static
 	 */
-	public static function cache($name, $data = NULL, $lifetime = 0, $namespace = NULL)
+	public static function cache($name, $data = NULL, $lifetime = NULL, $namespace = NULL)
 	{
 		if($namespace === NULL)
 		{
@@ -460,6 +469,12 @@ class Kohana extends Kohana_Core
 		}
 		
 		$name = $namespace.$name;
+		
+		if ($lifetime === NULL)
+		{
+			// Use the default lifetime
+			$lifetime = Kohana::$cache_life;
+		}
 
 		if ($data === NULL)
 		{
