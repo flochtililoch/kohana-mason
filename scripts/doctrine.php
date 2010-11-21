@@ -16,12 +16,12 @@ if(!is_dir(CACHEPATH.'classes'))
 // Initiate Entity manager
 $orm = Orm::factory();
 
-$helperSet = new \Symfony\Components\Console\Helper\HelperSet(array(
+$helperSet = new \Symfony\Component\Console\Helper\HelperSet(array(
     'db' => new \Doctrine\DBAL\Tools\Console\Helper\ConnectionHelper($orm->getConnection()),
     'em' => new \Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper($orm)
 ));
 
-$cli = new \Symfony\Components\Console\Application('Doctrine Command Line Interface', Doctrine\Common\Version::VERSION);
+$cli = new \Symfony\Component\Console\Application('Doctrine Command Line Interface', Doctrine\Common\Version::VERSION);
 $cli->setCatchExceptions(true);
 $cli->setHelperSet($helperSet);
 $cli->addCommands(array(

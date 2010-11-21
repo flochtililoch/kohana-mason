@@ -12,7 +12,15 @@ class Doctrine_Profiler implements SqlLogger
 {
 	public static $log;
 	
-    public function logSql($sql, array $params = null)
+	/**
+     * Logs a SQL statement somewhere.
+     *
+     * @param string $sql The SQL to be executed.
+     * @param array $params The SQL parameters.
+     * @param float $executionMS The microtime difference it took to execute this query.
+     * @return void
+     */
+    public function startQuery($sql, array $params = null, array $types = null)
     {
         // Config defines log status
 		if (Kohana::$logging === TRUE)
@@ -34,5 +42,13 @@ class Doctrine_Profiler implements SqlLogger
         	}
 		}
     }
+
+    /**
+     * Mark the last started query as stopped. This can be used for timing of queries.
+     *
+     * @return void
+     */
+    public function stopQuery(){}
+
 
 }	// End Doctrine_Profiler
