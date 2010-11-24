@@ -635,7 +635,7 @@ class Kohana extends Kohana_Core
 					}
 				}
 				else
-				{var_dump($matches); die();
+				{
 					throw new Kohana_View_Exception('The requested asset file :file could not be found', array(
 						':file' => $matches[1].'.'.$matches[2],
 					));
@@ -677,7 +677,7 @@ class Kohana extends Kohana_Core
 			{
 				$cmd = 'rd "%s" /s /q';
 			}
-			//system(sprintf($cmd, CACHEPATH.'classes/controller'));
+			system(sprintf($cmd, CACHEPATH.'classes/controller'));
 			system(sprintf($cmd, CACHEPATH.'i18n'));
 			system(sprintf($cmd, CACHEPATH.'kohana'));
 			system(sprintf($cmd, CACHEPATH.'views'));
