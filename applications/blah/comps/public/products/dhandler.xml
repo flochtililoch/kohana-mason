@@ -1,5 +1,0 @@
-<comp>
-	<process>
-		<key name="products">$this->products</key>
-	</process>
-</comp>
