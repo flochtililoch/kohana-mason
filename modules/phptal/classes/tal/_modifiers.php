@@ -42,7 +42,21 @@ function phptal_tales_comp($paths, $nothrow)
 		$params = '';
 	}
 
-	return 'phptal_tostring(Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response)';
+	return 'Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response';
+}
+
+/**
+ * Load an entity from ORM manager
+ */
+function phptal_tales_orm($path, $nothrow)
+{
+	// Convert path to array
+	$segments = explode('/', trim($path));
+	
+	// First string in path is an entity
+	$entity = array_shift($segments);
+	
+	return '$ctx->path(ORM::Load(\''.$entity.'\'), \''.implode('/', $segments).'\')';
 }
 
 /**
