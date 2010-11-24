@@ -2,6 +2,7 @@
 
 return array
 (
+	// APPLICATION BLAH
 	// ****** DEVELOPMENT ******
 	'dev.blah.fr' => array(
 		'appname'	=> 'blah',
@@ -131,5 +132,19 @@ return array
 			'//blah.co.uk/a2/',
 			'//blah.co.uk/a3/'
 			)
+		),
+
+		
+	// APPLICATION MYSHITY
+	// ****** DEVELOPMENT ******
+	'dev.admin.fr' => array(
+		'appname'	=> 'admin',
+		'locale'	=> 'fr_FR',
+		'channel'	=> 1,
+		'env'		=> Kohana::DEVELOPMENT,
+		'cdn'		=> array(
+			'//dev.admin.fr/assets/'
+			)	
 		)
+	
 );
