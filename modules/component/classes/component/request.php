@@ -132,7 +132,7 @@ class Component_Request extends Kohana_Request
 	 */
 	public function shift_param()
 	{
-		// Return the full array
+		// Return first array's element
 		return array_shift($this->_params);
 	}
 

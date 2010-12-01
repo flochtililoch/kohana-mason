@@ -42,7 +42,7 @@ function phptal_tales_comp($paths, $nothrow)
 		$params = '';
 	}
 
-	return 'Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response';
+	return 'phptal_tostring(Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response)';
 }
 
 /**
@@ -58,6 +58,47 @@ function phptal_tales_orm($path, $nothrow)
 	
 	return '$ctx->path(ORM::Load(\''.$entity.'\'), \''.implode('/', $segments).'\')';
 }
+
+/**
+ * Static method call
+ */
+function phptal_tales_static($paths, $nothrow)
+{
+	// Convert path to array
+	$paths = explode(' ', trim($paths));
+	
+	// First string in path is class name/method_name
+	$static = explode('/', array_shift($paths));
+	$class = $static[0];
+	$method = $static[1];
+	
+	if(count($paths))
+	{
+		$params = array();
+		foreach($paths as $path)
+		{
+			$segments = explode('/', $path);
+			$obj = '$ctx->'.array_shift($segments);
+			if(count($segments))
+			{
+				$params[] = '$ctx->path('.$obj.', \''.implode('/', $segments).'\')';
+			}
+			// If there's just one object path, no needs to run path() on it
+			else
+			{
+				$params[] ='\''.$path.'\' => '.$obj;
+			}
+		}
+		$params = implode(', ', $params);
+	}
+	else
+	{
+		$params = '';
+	}
+
+	return 'phptal_tostring('.$class.'::'.$method.'('.$params.'))';
+}
+
 
 /**
  * Return a resource path

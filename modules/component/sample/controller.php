@@ -50,18 +50,17 @@ class %2$s extends %3$s
 	 * Return variable from current context
 	 *
 	 * @param	string	context variable name (without the '$' sign)
-	 * @return	mixed	context variable value
+	 * @param	boolean	if set to true, will only check if variable is set
+	 * @return	mixed	context variable value or boolean is isset param set to true
 	 */
-	public static function context($varname)
+	public static function context($varname, $isset = FALSE)
 	{
 		// Look for requested variable in current controller context
 		if(array_key_exists($varname, self::$_process))
 		{
-			return self::$_process[$varname];
+			return ($isset === TRUE ? TRUE : self::$_process[$varname]);
 		}
-		
-		return NULL;
-
+		return ($isset === TRUE ? FALSE : NULL);
 	}
 	
 	/**

@@ -29,7 +29,7 @@ class Tal_Context extends PHPTAL_Context
 		while($controller)
 		{
 			// If var exists in controller context
-			if($controller::context($varname) !== NULL)
+			if($controller::context($varname, TRUE))
 			{
 				return $controller::context($varname);
 			}
