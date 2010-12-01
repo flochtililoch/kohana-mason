@@ -193,8 +193,21 @@ class Component_I18n
 	 * @access	public
 	 * @static
 	 */
-	public static function get($string)
+	public static function get($string, $vars = NULL)
 	{
+		if($vars !== NULL)
+		{
+			if(is_array($vars))
+			{
+				foreach($vars as $k => $v)
+				{
+//					if(is_string($k))
+					{
+						I18n::instance()->setVar($k, $v);
+					}
+				}
+			}
+		}
 		// Return the translated string if it exists
 		return I18n::instance()->translate($string);
 	}
