@@ -86,7 +86,7 @@ function phptal_tales_static($paths, $nothrow)
 			// If there's just one object path, no needs to run path() on it
 			else
 			{
-				$params[] ='\''.$path.'\' => '.$obj;
+				$params[] ='\''.$path.'\'';
 			}
 		}
 		$params = implode(', ', $params);
@@ -98,7 +98,6 @@ function phptal_tales_static($paths, $nothrow)
 
 	return 'phptal_tostring('.$class.'::'.$method.'('.$params.'))';
 }
-
 
 /**
  * Return a resource path

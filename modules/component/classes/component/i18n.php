@@ -201,10 +201,7 @@ class Component_I18n
 			{
 				foreach($vars as $k => $v)
 				{
-//					if(is_string($k))
-					{
-						I18n::instance()->setVar($k, $v);
-					}
+					I18n::instance()->setVar($k, $v);
 				}
 			}
 		}
@@ -339,6 +336,29 @@ class Component_I18n
 		
         return $uri;
     }
+
+	/**
+     * return localized datetime
+     * @param	timestamp 	datetime to convert to a string
+	 * @param	integer		type of the output
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static function datetime($timestamp, $datetype = 'medium', $timetype = 'short')
+	{
+		$types = array(
+			'none' => IntlDateFormatter::NONE,
+			'full' => IntlDateFormatter::FULL,
+			'long' => IntlDateFormatter::LONG,
+			'medium' => IntlDateFormatter::MEDIUM,
+			'short' => IntlDateFormatter::SHORT,
+			'traditional' => IntlDateFormatter::TRADITIONAL,
+			'gregorian' => IntlDateFormatter::GREGORIAN
+		);
+		$df = new IntlDateFormatter(Kohana::$locale, $types[$datetype], $types[$timetype]);
+		return $df->format($timestamp);
+	}
 	
 	/**
      * Write string to translate
