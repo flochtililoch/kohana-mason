@@ -165,7 +165,7 @@ class Component_Core
 		$xml_comp = Kohana::find_file('comps', $path.'/'.$directory.$controller, 'xml');
 
 		// Generate cache dir name matching the component
-		$cache_dir = CACHEPATH.'/classes/controller/'.$path.'/'.$directory;
+		$cache_dir = CACHEPATH.'classes/controller/'.$path.'/'.$directory;
 
 		// Set full path of compiled comp
 		$compiled_comp = $cache_dir.$controller.Kohana::$tree['cache_ids'][strtolower($class)].EXT;
