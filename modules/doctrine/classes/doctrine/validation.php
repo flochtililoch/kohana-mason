@@ -87,12 +87,12 @@ EOT
 	 */
 	protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output)
 	{
-		$validation_path = 'model/validation';
+		$validation_path = 'model/yaml';
 		$files = Kohana::list_files($validation_path);
 		
 		foreach($files as $file)
 		{
-			preg_match('/'.preg_quote($validation_path, '/').'\/([A-Za-z0-9-\.]+)\.([A-Za-z0-9-]+)\.yml/', $file, $schema_info);
+			preg_match('/'.preg_quote($validation_path, '/').'\/([A-Za-z0-9-\.]+)\.([A-Za-z0-9-]+)\.dcm\.yml/', $file, $schema_info);
 
 			// Process destination directory
 			if(!is_dir($destPath = CACHEPATH.'classes/validation/'.str_replace('.','/',$schema_info[1])))
@@ -114,22 +114,13 @@ EOT
 				);
 			}
 			
-			$file = $schema_info[1].'.'.$schema_info[2];
+			$filename = $schema_info[1].'.'.$schema_info[2];
 			$entity = $schema_info[1].'\\'.$schema_info[2];
-			$class = str_replace('.', '_', $file);
-			$path = str_replace('.', '/', $file);
+			$class = str_replace('.', '_', $filename);
+			$path = str_replace('.', '/', $filename);
 			$dest_file = CACHEPATH.'classes/validation/'.$path.'.php';
 			
-			if($input->getOption('extends-entities') !== NULL)
-			{
-				$entity_path = CACHEPATH.'classes/'.$path.'.php';
-				$entity_class = file_get_contents($entity_path);
-				file_put_contents($entity_path, preg_replace('/class ([a-zA-Z0-9_]+)( extends )?([\\a-zA-Z0-9_]+)?/','class $1 extends \\Validation_'.$class.PHP_EOL, $entity_class));
-			}
-			
-			$output->write(sprintf('Processing entity\'s rules "<info>%s</info>"', $dest_file) . PHP_EOL);
-
-			$validation_schema = Yaml::load(Kohana::find_file('model', 'validation/'.$file, 'yml'));
+			$entity_schema = Yaml::load($file);
 			$validation_class_tpl = 
 	'<?php
 /**
@@ -137,25 +128,14 @@ EOT
  */
 class Validation_%1$s
 {
-	private $_validation_rules = %2$s;
+	public $rules = %2$s;
 	
-	public function validation_rules($key = NULL, $json = FALSE)
-	{
-		if($key !== NULL)
-		{
-			$r = $this->_validation_rules[$key];
-		}
-		else
-		{
-			$r = $this->_validation_rules;
-		}
-		return $json === TRUE ? json_encode($r) : $r;
-	}
-
+	public $rules_json = %3$s;
+	
 	public function update($data)
 	{
 		$dv = Validate::factory($data)
-%3$s;
+%4$s;
 
 		if($dv->check())
 		{
@@ -169,58 +149,75 @@ class Validation_%1$s
 
 } // End %1$s';
 
-
 			$rules_code = NULL;
-			foreach($validation_schema[$entity]['rules'] as $field => $rules)
+			$rules_export = array();
+			$rules_export_json = array();
+			foreach($entity_schema[$entity]['fields'] as $field => $props)
 			{
-				if(is_array($rules))
+				if(array_key_exists('rules', $props))
 				{
-					$rs = array();
-					foreach($rules as $name => $rule)
+					$rules = $props['rules'];
+					$rules_export = array_merge(array($field => $rules), $rules_export);
+					$rules_export_json[$field] = json_encode($rules);
+					if(is_array($rules))
 					{
-						if(is_array($rule))
+						$rs = array();
+						foreach($rules as $name => $rule)
 						{
-							foreach($rule as $k => $v)
+							if(is_array($rule))
 							{
-								if(is_string($k))
+								foreach($rule as $k => $v)
 								{
-									$rs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
-								}
-								else
-								{
-									$rs[] = $v;
-									$key = $name;
+									if(is_string($k))
+									{
+										$rs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
+									}
+									else
+									{
+										$rs[] = $v;
+										$key = $name;
+									}
 								}
 							}
+							elseif(is_string($name))
+							{
+								$rs[] = '\''.$name.'\' => array('.(is_string($rule) ? '\''.$rule.'\'' : $rule).')';
+							}
+							else
+							{
+								$rs[] = '\''.$rule.'\' => NULL';
+							}
 						}
-						elseif(is_string($name))
-						{
-							$rs[] = '\''.$name.'\' => array('.(is_string($rule) ? '\''.$rule.'\'' : $rule).')';
-						}
-						else
-						{
-							$rs[] = '\''.$rule.'\' => NULL';
-						}
+						$r = '->rules'.'(\''.$field.'\', '.(isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $rs).'))'.(isset($key) ? ')' : '');
+						unset($key);
 					}
-					$r = '->rules'.'(\''.$field.'\', '.(isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $rs).'))'.(isset($key) ? ')' : '');
-					unset($key);
-				}
-				elseif(is_string($rules))
-				{
-					$r = '->rule(\''.$field.'\', \''.$rules.'\')';
-				}
-				$rules_code .= "				".$r."\n";
-			}
+					elseif(is_string($rules))
+					{
+						$r = '->rule(\''.$field.'\', \''.$rules.'\')';
+					}
+					$rules_code .= "				".$r."\n";
 
-			// Write php file
-			file_put_contents(
-				$dest_file,
-				sprintf( 
-					$validation_class_tpl,
-					$class,
-					var_export($validation_schema[$entity]['rules'], TRUE),
-					rtrim($rules_code)
-					));
+					// Write php file
+					file_put_contents(
+						$dest_file,
+						sprintf( 
+							$validation_class_tpl,
+							$class,
+							var_export($rules_export, TRUE),
+							var_export($rules_export_json, TRUE),
+							rtrim($rules_code)
+							));
+					
+					if($input->getOption('extends-entities') !== NULL)
+					{
+						$entity_path = CACHEPATH.'classes/'.$path.'.php';
+						$entity_class = file_get_contents($entity_path);
+						file_put_contents($entity_path, preg_replace('/class ([a-zA-Z0-9_]+)( extends )?([\\a-zA-Z0-9_]+)?/','class $1 extends \\Validation_'.$class.PHP_EOL, $entity_class));
+					}
+					$output->write(sprintf('Processing entity\'s rules "<info>%s</info>"', $dest_file) . PHP_EOL);
+				
+				}
+			}
 		}
 	}
 }
