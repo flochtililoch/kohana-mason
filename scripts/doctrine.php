@@ -44,5 +44,8 @@ $cli->addCommands(array(
     new \Doctrine\ORM\Tools\Console\Command\ConvertMappingCommand(),
     new \Doctrine\ORM\Tools\Console\Command\RunDqlCommand(),
 
+	// Custom Commands
+	new Validation()
+
 ));
 $cli->run();
