@@ -135,13 +135,28 @@ class Validation_%1$s
 	public $json_rules = array(
 		%3$s
 		);
+		
+	public $filters = array(
+		%4$s
+		);
 	
 	public function update($data)
 	{
 		$dv = Validate::factory($data);
 		foreach($data as $field => $value)
 		{
-			if(array_key_exists($field, $this->rules))
+			if(isset($this->filters) && array_key_exists($field, $this->filters))
+			{
+				if(is_array($this->filters[$field]))
+				{
+					$dv->filters($field, $this->filters[$field]);
+				}
+				else
+				{
+					$dv->filter($field, $this->filters[$field]);
+				}
+			}
+			if(isset($this->rules) && array_key_exists($field, $this->rules))
 			{
 				if(is_array($this->rules[$field]))
 				{
@@ -156,11 +171,18 @@ class Validation_%1$s
 
 		if($dv->check())
 		{
+			foreach($dv->as_array() as $p => $v)
+			{
+				$this->{\'set\'.Ucfirst($p)}($v);
+			}
 			return TRUE;
 		}
 		else
 		{
-			return $dv->errors();
+			return array(
+				\'errors\' => $dv->errors(\'validate\'),
+				\'data\' => $dv->as_array()
+				);
 		}
 	}
 
@@ -168,7 +190,7 @@ class Validation_%1$s
 
 			$rules_code = NULL;
 			$json_rules_code = NULL;
-
+			$filters_code = NULL;
 			foreach($entity_schema[$entity]['fields'] as $field => $props)
 			{
 				if(array_key_exists('rules', $props))
@@ -223,9 +245,57 @@ class Validation_%1$s
 						$json_rules_code .= "		".$r_json.",\n";
 					}
 				}
+				
+				if(array_key_exists('filters', $props))
+				{
+					$filters = $props['filters'];
+					$f = NULL;
+					if(is_array($filters))
+					{
+						$fs = array();
+						foreach($filters as $name => $filter)
+						{
+							if(is_array($filter))
+							{
+								foreach($filter as $k => $v)
+								{
+									if(is_string($k))
+									{
+										$fs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
+									}
+									else
+									{
+										$fs[] = $v;
+										$key = $name;
+									}
+								}
+							}
+							elseif(is_string($name))
+							{
+								$fs[] = '\''.$name.'\' => array('.(is_string($filter) ? '\''.$filter.'\'' : $filter).')';
+							}
+							else
+							{
+								$fs[] = '\''.$filter.'\' => NULL';
+							}
+						}
+						$filter = (isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $fs).')'.(isset($key) ? ')' : '');
+						$f = '\''.$field.'\' => '.$filter;
+							
+						unset($key);
+					}
+					elseif(is_string($filters))
+					{
+						$f = '\''.$field.'\' => \''.$filters.'\'';
+					}
+					if($r !== NULL)
+					{
+						$filters_code .= "		".$f.",\n";
+					}
+				}
 			}
 			
-			if($rules_code !== NULL)
+			if($rules_code !== NULL || $filters_code !== NULL)
 			{
 				// Write php file
 				file_put_contents(
@@ -234,7 +304,8 @@ class Validation_%1$s
 						$validation_class_tpl,
 						$class,
 						trim($rules_code),
-						trim($json_rules_code)
+						trim($json_rules_code),
+						trim($filters_code)
 						));
 			
 				if($input->getOption('extends-entities') !== NULL)
