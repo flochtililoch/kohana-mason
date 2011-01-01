@@ -45,7 +45,7 @@ class Kohana_Auth_Doctrine extends Auth
 						$role = ORM::load('Role')->findBy(array('name' => $role));
 					}
 					// If the user doesn't have the role
-					if(!$user->getRoles()->contains($role))
+					if(!$user->getRoles()->contains($role[0]))
 					{
 						// Set the status false and get outta here
 						$status = FALSE;
