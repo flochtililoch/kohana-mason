@@ -1,0 +1,16 @@
+Entities\Locale:
+  type: entity
+  table: locales
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    locale:
+      type: string
+      length: 5
+      unique: true
+    description:
+      type: string
+      length: 60
