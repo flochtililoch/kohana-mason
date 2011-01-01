@@ -1,0 +1,46 @@
+Entities\User:
+  type: entity
+  table: users
+  id:
+    id:
+      type: integer
+      generator:
+        strategy: AUTO
+  fields:
+    login:
+      type: string
+      length: 60
+      unique: true
+      filters: trim
+      rules:
+        email: true
+        min_length: 6
+        max_length: 60
+    password:
+      type: string
+      length: 60
+      rules:
+        not_empty: true
+        min_length: 6
+        max_length: 60
+        regex: /^.*(?=.*[a-z])(?=.*[A-Z]).*$/    # http://www.zorched.net/2009/05/08/password-strength-validation-with-regular-expressions/
+    locale:
+      type: string
+      length: 5
+      rules:
+        i18n::valid_locale
+  oneToMany:
+    token:
+      targetEntity: Entities\Token
+      mappedBy: user
+  manyToMany:
+    roles:
+      targetEntity: Entities\Role
+      joinTable:
+        name: users_roles
+        joinColumns:
+          user_id:
+            referencedColumnName: id
+        inverseJoinColumns:
+          role_id:
+            referencedColumnName: id
