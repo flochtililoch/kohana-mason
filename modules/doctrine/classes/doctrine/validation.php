@@ -62,6 +62,11 @@ equalTo( other )	Returns: Boolean					Requires the element to be the same as ano
  */
 class Doctrine_Validation extends Console\Command\Command
 {
+	
+	private $_model_path = 'model/yaml';
+	
+	private $_ext = 'yml';
+	
     /**
      * @see Console\Command\Command
      */
@@ -89,7 +94,7 @@ EOT
 	{
 		$validation_path = 'model/yaml';
 		$files = Kohana::list_files($validation_path);
-		
+	
 		foreach($files as $file)
 		{
 			preg_match('/'.preg_quote($validation_path, '/').'\/([A-Za-z0-9-\.]+)\.([A-Za-z0-9-]+)\.dcm\.yml/', $file, $schema_info);
@@ -120,7 +125,20 @@ EOT
 			$path = str_replace('.', '/', $filename);
 			$dest_file = CACHEPATH.'classes/validation/'.$path.'.php';
 			
-			$entity_schema = Yaml::load($file);
+			/**
+			 * Copy/Paste from yamldriver.php // TODO : FACTORIZE!
+			 */
+			$filename = preg_replace('/.*'.preg_quote($this->_model_path, '/').'\/(.*)\.'.$this->_ext.'$/', '$1', $file);
+			$mapping = array();			
+			
+			$filename = preg_replace('/.*'.preg_quote($this->_model_path, '/').'\/(.*)\.'.$this->_ext.'$/', '$1', $file);
+			$mapping = array();
+			foreach(Kohana::find_file('model/yaml', $filename, $this->_ext, TRUE) as $file)
+			{
+				$mapping = Arr::merge($mapping, \Symfony\Component\Yaml\Yaml::load($file));
+			}
+			
+			$entity_schema = $mapping;
 			$validation_class_tpl = 
 	'<?php
 /**
@@ -173,6 +191,16 @@ class Validation_%1$s
 		{
 			foreach($dv->as_array() as $p => $v)
 			{
+				if(array_key_exists($p, $this->rules))
+				{
+					if(is_array($this->rules[$p]) && in_array(\'date\', $this->rules[$p]) || $this->rules[$p] === \'date\')
+					{
+						$date_format = array_key_exists($p.\'_datetype\', $data) ? $data[$p.\'_datetype\'] : I18n::DATE_TYPE;
+						$time_format = array_key_exists($p.\'_timetype\', $data) ? $data[$p.\'_timetype\'] : I18n::TIME_TYPE;
+						unset($data[$p.\'_datetype\'], $data[$p.\'_timetype\']);
+						$v = I18n::datetime($v, $date_format, $time_format)->datetime;
+					}
+				}
 				$this->{\'set\'.Ucfirst($p)}($v);
 			}
 			return TRUE;
