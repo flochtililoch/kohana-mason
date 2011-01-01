@@ -40,7 +40,7 @@ class Doctrine_Orm extends EntityManager
 			$config->setQueryCacheImpl($cache);
 		}
 		
-		$config->setMetadataDriverImpl(new Doctrine\ORM\Mapping\Driver\YamlDriver(Kohana::list_paths('model/yaml')));
+		$config->setMetadataDriverImpl(new YamlDriver(Kohana::list_paths('model/yaml')));
 		$config->setAutoGenerateProxyClasses(FALSE);
 		
 		// Proxy configuration
