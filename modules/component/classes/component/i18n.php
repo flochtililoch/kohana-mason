@@ -10,6 +10,25 @@ class Component_I18n
 {
 	const CONTENT_DOMAIN = 'content';	// reference to PO file used for content translations
 	const ROUTES_DOMAIN  = 'routes';	// reference to PO file used for routes translations
+	const DATE_TYPE = 'medium';
+	const TIME_TYPE = 'short';
+	
+	public static $format_types = array(
+		'none' => IntlDateFormatter::NONE,
+		'full' => IntlDateFormatter::FULL,
+		'long' => IntlDateFormatter::LONG,
+		'medium' => IntlDateFormatter::MEDIUM,
+		'short' => IntlDateFormatter::SHORT,
+		'traditional' => IntlDateFormatter::TRADITIONAL,
+		'gregorian' => IntlDateFormatter::GREGORIAN
+	);
+	
+	public static $locale_valid_pattern = '/^([a-z]{2})_([A-Z]{2})$/';
+	
+	/**
+	 * @var  string  source language: en-us, es-es, zh-cn, etc
+	 */
+	public static $source = 'en-us';
 	
 	/**
 	 * NOTICE : defined for compatibility with default Kohana translation service
@@ -17,11 +36,6 @@ class Component_I18n
 	 * @static
 	 */
 	public static $lang = NULL;
-	
-	/**
-	 * @var  string  source language: en-us, es-es, zh-cn, etc
-	 */
-	public static $source = 'en-us';
 	
 	/**
      * Main translator singleton instance
@@ -66,7 +80,7 @@ class Component_I18n
 		I18n::source($source);
 		
 	    // If locale string is well formed
-        if(preg_match('/^([a-z]{2})_([A-Z]{2})$/', $locale, $i18n))
+        if(preg_match(I18n::$locale_valid_pattern, $locale, $i18n))
         {
 			I18n::locale($locale);
             I18n::language($i18n[1]);
@@ -339,25 +353,63 @@ class Component_I18n
 
 	/**
      * return localized datetime
-     * @param	timestamp 	datetime to convert to a string
+     * @param	mixed 		string or timestamp representing the date to localize
 	 * @param	integer		type of the output
 	 *
 	 * @access	public
 	 * @static
 	 */
-	public static function datetime($timestamp, $datetype = 'medium', $timetype = 'short')
+	public static function datetime($input_date, $datetype = I18n::DATE_TYPE, $timetype = I18n::TIME_TYPE)
 	{
-		$types = array(
-			'none' => IntlDateFormatter::NONE,
-			'full' => IntlDateFormatter::FULL,
-			'long' => IntlDateFormatter::LONG,
-			'medium' => IntlDateFormatter::MEDIUM,
-			'short' => IntlDateFormatter::SHORT,
-			'traditional' => IntlDateFormatter::TRADITIONAL,
-			'gregorian' => IntlDateFormatter::GREGORIAN
-		);
-		$df = new IntlDateFormatter(Kohana::$locale, $types[$datetype], $types[$timetype]);
-		return $df->format($timestamp);
+		$df = new IntlDateFormatter(Kohana::$locale, I18n::$format_types[$datetype], I18n::$format_types[$timetype]);
+		
+		if(is_numeric($input_date))
+		{
+			$string = $df->format($input_date);
+			$timestamp = $input_date;			
+		}
+		else
+		{
+			$string = $input_date;
+			$timestamp = $df->parse($input_date);
+		}
+		
+		$datetime = new Datetime();
+		$datetime->setTimestamp($timestamp);
+
+		return (object) array(
+				'string' => $string,
+				'pattern' => $df->getPattern(),
+				'timestamp' => $timestamp,
+				'datetime' => $datetime
+				);
+	}
+	
+	/**
+     * Check wether a string is a valid locale
+     * @param	string 		string representing the locale
+	 * @param	boolean		enforce check by looking up value in database
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static function valid_locale($locale, $strict = TRUE)
+	{
+		// If locale string is well formed
+        if(preg_match(I18n::$locale_valid_pattern, $locale))
+        {
+			// If we need to check if the locale exists in the database
+			if($strict === TRUE)
+			{
+				if(count(ORM::load('Locale')->findBy(array('locale' => $locale))))
+				{
+					return TRUE;
+				}
+				return FALSE;
+			}
+			return TRUE;
+		}
+		return FALSE;
 	}
 	
 	/**

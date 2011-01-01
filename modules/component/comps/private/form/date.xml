@@ -1,0 +1,17 @@
+<comp>
+	<php>
+		<![CDATA[
+			$timestamp = array_shift($this->request->args);
+			$name = array_shift($this->request->args);
+			$datetype = ($arg = array_shift($this->request->args)) ? $arg : 'medium';
+			$timetype = ($arg = array_shift($this->request->args)) ? $arg : 'short';
+			$datetime = I18n::datetime($timestamp, $datetype, $timetype)->string;
+		]]>
+	</php>
+	<process>
+		<key name="name">$name</key>
+		<key name="datetime">$datetime</key>
+		<key name="datetype">$datetype</key>
+		<key name="timetype">$timetype</key>
+	</process>
+</comp>
