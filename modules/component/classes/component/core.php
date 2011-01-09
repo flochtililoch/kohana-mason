@@ -234,6 +234,9 @@ class Component_Core
 			'_assets_pushed' 	=> 'protected static $_assets_pushed = array();'												// Component's assets pushed flag
 		);
 		
+		// Attributes to be processed
+		$attributes_process = array();
+		
 		// Compile attributes
 		foreach($xml->attr as $keys)
 		{
@@ -256,6 +259,29 @@ class Component_Core
 						preg_match('/^(.*) \$'.$tag_attributes['name'].' = .*;$/', $attributes[$tag_attributes['name']], $visibility);
 						$visibility = $visibility[1];
 					}
+					
+					if(array_key_exists('process', $tag_attributes))
+					{
+						$accessor = NULL;
+						if(preg_match('/(.*)?static(.*)?/', $visibility))
+						{
+							$accessor = 'self::$';
+						}
+						else
+						{
+							$accessor = '$this->';
+						}
+						$attributes_process[$tag_attributes['name']] = sprintf(
+							'%1$s%2$s = %3$s;',
+							$accessor,
+							$tag_attributes['name'],
+							$key[0]
+							);
+						
+						// Make sure the attribute will be set to NULL in class property declaration
+						$key[0] = 'NULL';
+					}
+					
 
 					$attributes[$tag_attributes['name']] = sprintf(
 						'%1$s $%2$s = %3$s;',
@@ -265,7 +291,7 @@ class Component_Core
 						$tag_attributes['name'],
 						$key[0]
 						);
-				}
+					}
 			}
 		}
 
@@ -278,6 +304,7 @@ class Component_Core
 				$class,																				// class name
 				$extends,																			// extended from
 				implode($attributes, chr(13).chr(9)),												// attributes
+				implode($attributes_process, chr(13).chr(9)),										// attributes
 				trim($xml->php),																	// php code
 				implode($process, chr(13).chr(9).chr(9))					                        // view variables
 				));
