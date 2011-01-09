@@ -9,6 +9,14 @@ class %2$s extends %3$s
 	%4$s
 	// --------------
 	
+	public function before()
+	{
+		// <attr process="true"/> section
+		%5$s
+		// -------------
+		parent::before();
+	}
+	
 	/**
 	 * Controller default action method
 	 *
@@ -20,11 +28,11 @@ class %2$s extends %3$s
 		parent::action_index();
 		
 		// <php/> section
-		%5$s
+		%6$s
 		// -------------
 	
 		// <process/> section
-		%6$s
+		%7$s
 		// -----------------
 		
 		// Store current comp name in base component wrapping_chain method
