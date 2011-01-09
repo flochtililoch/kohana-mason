@@ -25,7 +25,7 @@ class Tal_Context extends PHPTAL_Context
 		
 		// Get controller class name of current tal object
 		$controller = $this->controller;
-		
+
 		while($controller)
 		{
 			// If var exists in controller context
@@ -49,9 +49,21 @@ class Tal_Context extends PHPTAL_Context
 			// If nothing's found yet, look in parent's request controller
 			$controller = $controller::instance()->request->parent;
 		}
-		
+
 		// Fall back to PHPTAL default context getter
 		return parent::__get($varname);
+	}
+	
+	/**
+     * Context variable isset checker.
+     *
+     * @return	bool
+	 * @access	public
+	 */
+	public function __isset($varname)
+	{
+		$this->noThrow(TRUE);
+		return (bool) $this->$varname;
 	}
 
 }	// End Tal_Context
