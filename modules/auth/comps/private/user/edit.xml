@@ -1,0 +1,31 @@
+<comp>
+	<php>
+		<![CDATA[
+			$username = $this->request->args[0];
+			$user = NULL;
+			$form = array();
+
+			// If username was sent in the URL
+			if($username !== NULL)
+			{
+				// If username passed in the URL exists, load it and shift param
+				if(($user = ORM::Load('User')->findOneBy(array('login' => $username))) !== NULL)
+				{
+					$this->request->shift_param();
+
+					// If user form was posted
+					if(count($_POST))
+					{
+						// Try validate form
+						$form = $user->update($_POST);
+					}
+				}
+			}
+		]]>
+	</php>
+	<process>
+		<key name="username">$username</key>
+		<key name="user">$user</key>
+		<key name="form">$form</key>
+	</process>
+</comp>

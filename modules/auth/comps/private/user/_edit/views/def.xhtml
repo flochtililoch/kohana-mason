@@ -1,0 +1,24 @@
+<form action="" method="post">
+	<h1 i18n:translate="" tal:condition="not: user/getLogin | nothing">Add user</h1>
+	<h1 i18n:translate="" tal:condition="user/getLogin | nothing">Edit <span i18n:name="user" tal:replace="user/getLogin"/></h1>
+	<p tal:condition="user_is_admin">
+		<label for="edit_login" i18n:translate="">Login</label>
+		<input type="text" id="edit_login" name="login" tal:attributes="value form/data/login | user/getLogin | default; class user/json_rules/login | nothing"/>
+		<span tal:condition="exists: form/errors/login" tal:content="form/errors/login" class="error"/>
+	</p>
+	<p>
+		<label for="edit_locale" i18n:translate="">Locale</label>
+		<select name="locale" id="edit_locale">
+			<tal:block tal:repeat="locale orm: Locale/FindAll">
+				<tal:block tal:define="locale_code locale/getLocale; locale_desc locale/getDescription; user_locale_code user/getLocale | nothing">
+					<option tal:content="string: ${locale_code} - ${locale_desc}" tal:attributes="value locale_code; selected php: locale_code EQ user_locale_code"/>
+				</tal:block>
+			</tal:block>
+		</select>
+		<span tal:condition="exists: form/errors/locale" tal:content="form/errors/locale" class="error"/>
+	</p>
+	<p>
+		<input type="hidden" name="csrf" tal:attributes="value static: CSRF/Token; user/getLogin | nothing"/>
+		<input type="submit"/>
+	</p>
+</form>
