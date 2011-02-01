@@ -299,7 +299,7 @@ class Component_Core
 		file_put_contents(
 			$compiled_comp,
 			'<?php'.sprintf( 
-				substr(file_get_contents(MODPATH.'component/templates/controller'.EXT), 5, -1),		// comp template
+				substr(file_get_contents(MODPATH.'component/templates/classes/controller'.EXT), 5, -1),		// comp template
 				$xml_comp,															                // xml comp path
 				$class,																				// class name
 				$extends,																			// extended from
