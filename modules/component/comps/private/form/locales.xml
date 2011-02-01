@@ -1,4 +1,7 @@
 <comp>
+	<attr>
+		<key name="_locales" visibility="protected static" process="true">ORM::load('Locale')->findAll()</key>
+	</attr>
 	<process>
 		<key name="default_locale">Kohana::$locale</key>
 		<key name="id">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>

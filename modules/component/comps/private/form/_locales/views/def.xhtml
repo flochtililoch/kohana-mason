@@ -1,5 +1,5 @@
 <select tal:attributes="id id | nothing; name name | nothing; multiple php:(multiple EQ 'multiple') ? 'multiple' : NULL" name="locales[]" id="locales">
-	<tal:block tal:repeat="locale orm: Locale/FindAll">
+	<tal:block tal:repeat="locale locales">
 		<tal:block tal:define="locale_code string:${locale/getLanguage/getIso}_${locale/getCountry/getIso}; locale_desc string:${locale/getLanguage/getLanguage} (${locale/getCountry/getCountry});">
 			<option tal:content="string: ${locale_code} - ${locale_desc}" tal:attributes="value locale_code; selected php: locale_code EQ default_locale;"/>
 		</tal:block>
