@@ -1,0 +1,8 @@
+<comp>
+	<process>
+		<key name="default_locale">Kohana::$locale</key>
+		<key name="id">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
+		<key name="name">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
+		<key name="multiple">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
+	</process>
+</comp>

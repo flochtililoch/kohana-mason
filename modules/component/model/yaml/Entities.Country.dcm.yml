@@ -1,0 +1,11 @@
+Entities\Country:
+  type: entity
+  table: countries
+  id:
+    iso:
+      type: string
+      length: 3
+  fields:
+    country:
+      type: string
+      length: 50

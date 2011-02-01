@@ -6,11 +6,14 @@ Entities\Locale:
       type: integer
       generator:
         strategy: AUTO
-  fields:
-    locale:
-      type: string
-      length: 5
-      unique: true
-    description:
-      type: string
-      length: 60
+  manyToOne:
+    language:
+      targetEntity: Entities\Language
+      joinColumn:
+        name: language_iso
+        referencedColumnName: iso
+    country:
+      targetEntity: Entities\Country
+      joinColumn:
+        name: country_iso
+        referencedColumnName: iso

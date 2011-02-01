@@ -1,0 +1,14 @@
+Entities\Language:
+  type: entity
+  table: languages
+  id:
+    iso:
+      type: string
+      length: 3
+  fields:
+    language:
+      type: string
+      length: 50
+    pluralform:
+      type: string
+      length: 150

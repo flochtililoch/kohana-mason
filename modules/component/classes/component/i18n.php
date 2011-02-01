@@ -396,12 +396,12 @@ class Component_I18n
 	public static function valid_locale($locale, $strict = TRUE)
 	{
 		// If locale string is well formed
-        if(preg_match(I18n::$locale_valid_pattern, $locale))
+        if(preg_match(I18n::$locale_valid_pattern, $locale, $matches))
         {
 			// If we need to check if the locale exists in the database
 			if($strict === TRUE)
 			{
-				if(count(ORM::load('Locale')->findBy(array('locale' => $locale))))
+				if(count(ORM::load('Locale')->findBy(array('language' => $matches[1], 'country' => $matches[2]))))
 				{
 					return TRUE;
 				}
