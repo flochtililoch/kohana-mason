@@ -77,7 +77,7 @@ class Doctrine_Validation extends Console\Command\Command
 		->setDescription('Generate validation rules from YAML files.')
 		->setDefinition(array(
 			new InputOption(
-                'extends-entities', null, InputOption::PARAMETER_OPTIONAL,
+                'extends-entities', null, InputOption::VALUE_REQUIRED,
                 'Flag to define if generator should modify existing entities classes to make them extends validation classes.', false
             )
 		))
@@ -139,203 +139,128 @@ EOT
 			}
 			
 			$entity_schema = $mapping;
-			$validation_class_tpl = 
-	'<?php
-/**
- * Validation_%1$s
- */
-class Validation_%1$s
-{
-	public $rules = array(
-		%2$s
-		);
-		
-	public $json_rules = array(
-		%3$s
-		);
-		
-	public $filters = array(
-		%4$s
-		);
-	
-	public function update($data)
-	{
-		$dv = Validate::factory($data);
-		foreach($data as $field => $value)
-		{
-			if(isset($this->filters) && array_key_exists($field, $this->filters))
-			{
-				if(is_array($this->filters[$field]))
-				{
-					$dv->filters($field, $this->filters[$field]);
-				}
-				else
-				{
-					$dv->filter($field, $this->filters[$field]);
-				}
-			}
-			if(isset($this->rules) && array_key_exists($field, $this->rules))
-			{
-				if(is_array($this->rules[$field]))
-				{
-					$dv->rules($field, $this->rules[$field]);
-				}
-				else
-				{
-					$dv->rule($field, $this->rules[$field]);
-				}
-			}
-		}
-
-		if($dv->check())
-		{
-			foreach($dv->as_array() as $p => $v)
-			{
-				if(array_key_exists($p, $this->rules))
-				{
-					if(is_array($this->rules[$p]) && in_array(\'date\', $this->rules[$p]) || $this->rules[$p] === \'date\')
-					{
-						$date_format = array_key_exists($p.\'_datetype\', $data) ? $data[$p.\'_datetype\'] : I18n::DATE_TYPE;
-						$time_format = array_key_exists($p.\'_timetype\', $data) ? $data[$p.\'_timetype\'] : I18n::TIME_TYPE;
-						unset($data[$p.\'_datetype\'], $data[$p.\'_timetype\']);
-						$v = I18n::datetime($v, $date_format, $time_format)->datetime;
-					}
-				}
-				$this->{\'set\'.Ucfirst($p)}($v);
-			}
-			return TRUE;
-		}
-		else
-		{
-			return array(
-				\'errors\' => $dv->errors(\'validate\'),
-				\'data\' => $dv->as_array()
-				);
-		}
-	}
-
-} // End %1$s';
-
 			$rules_code = NULL;
 			$json_rules_code = NULL;
 			$filters_code = NULL;
-			foreach($entity_schema[$entity]['fields'] as $field => $props)
+			if(array_key_exists('fields', $entity_schema[$entity]))
 			{
-				if(array_key_exists('rules', $props))
+				foreach($entity_schema[$entity]['fields'] as $field => $props)
 				{
-					$rules = $props['rules'];
-					$r = NULL;
-					$r_json = NULL;
-					if(is_array($rules))
+					if(array_key_exists('rules', $props))
 					{
-						$rs = array();
-						foreach($rules as $name => $rule)
+						$rules = $props['rules'];
+						$r = NULL;
+						$r_json = NULL;
+						if(is_array($rules))
 						{
-							if(is_array($rule))
+							$rs = array();
+							foreach($rules as $name => $rule)
 							{
-								foreach($rule as $k => $v)
+								if(is_array($rule))
 								{
-									if(is_string($k))
+									foreach($rule as $k => $v)
 									{
-										$rs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
-									}
-									else
-									{
-										$rs[] = $v;
-										$key = $name;
+										if(is_string($k))
+										{
+											$rs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
+										}
+										else
+										{
+											$rs[] = $v;
+											$key = $name;
+										}
 									}
 								}
+								elseif(is_string($name))
+								{
+									$rs[] = '\''.$name.'\' => array('.(is_string($rule) ? '\''.$rule.'\'' : $rule).')';
+								}
+								else
+								{
+									$rs[] = '\''.$rule.'\' => NULL';
+								}
 							}
-							elseif(is_string($name))
-							{
-								$rs[] = '\''.$name.'\' => array('.(is_string($rule) ? '\''.$rule.'\'' : $rule).')';
-							}
-							else
-							{
-								$rs[] = '\''.$rule.'\' => NULL';
-							}
-						}
-						$rule = (isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $rs).')'.(isset($key) ? ')' : '');
-						$r = '\''.$field.'\' => '.$rule;
+							$rule = (isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $rs).')'.(isset($key) ? ')' : '');
+							$r = '\''.$field.'\' => '.$rule;
 							
-						eval('$rule_compiled = '.$rule.';');
-						$r_json = '\''.$field.'\' => \''.json_encode($rule_compiled).'\'';
-						unset($key);
+							eval('$rule_compiled = '.$rule.';');
+							$r_json = '\''.$field.'\' => \''.json_encode($rule_compiled).'\'';
+							unset($key);
+						}
+						elseif(is_string($rules))
+						{
+							$r = '\''.$field.'\' => \''.$rules.'\'';
+							$r_json = '\''.$field.'\' => \''.json_encode($rules).'\'';
+						}
+						if($r !== NULL)
+						{
+							$rules_code .= "		".$r.",\n";
+							$json_rules_code .= "		".$r_json.",\n";
+						}
 					}
-					elseif(is_string($rules))
-					{
-						$r = '\''.$field.'\' => \''.$rules.'\'';
-						$r_json = '\''.$field.'\' => \''.json_encode($rules).'\'';
-					}
-					if($r !== NULL)
-					{
-						$rules_code .= "		".$r.",\n";
-						$json_rules_code .= "		".$r_json.",\n";
-					}
-				}
 				
-				if(array_key_exists('filters', $props))
-				{
-					$filters = $props['filters'];
-					$f = NULL;
-					if(is_array($filters))
+					if(array_key_exists('filters', $props))
 					{
-						$fs = array();
-						foreach($filters as $name => $filter)
+						$filters = $props['filters'];
+						$f = NULL;
+						if(is_array($filters))
 						{
-							if(is_array($filter))
+							$fs = array();
+							foreach($filters as $name => $filter)
 							{
-								foreach($filter as $k => $v)
+								if(is_array($filter))
 								{
-									if(is_string($k))
+									foreach($filter as $k => $v)
 									{
-										$fs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
-									}
-									else
-									{
-										$fs[] = $v;
-										$key = $name;
+										if(is_string($k))
+										{
+											$fs[] = 'array(\''.$k.'\' => array('.(is_string($v) ? '\''.$v.'\'' : $v).'))';
+										}
+										else
+										{
+											$fs[] = $v;
+											$key = $name;
+										}
 									}
 								}
+								elseif(is_string($name))
+								{
+									$fs[] = '\''.$name.'\' => array('.(is_string($filter) ? '\''.$filter.'\'' : $filter).')';
+								}
+								else
+								{
+									$fs[] = '\''.$filter.'\' => NULL';
+								}
 							}
-							elseif(is_string($name))
-							{
-								$fs[] = '\''.$name.'\' => array('.(is_string($filter) ? '\''.$filter.'\'' : $filter).')';
-							}
-							else
-							{
-								$fs[] = '\''.$filter.'\' => NULL';
-							}
-						}
-						$filter = (isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $fs).')'.(isset($key) ? ')' : '');
-						$f = '\''.$field.'\' => '.$filter;
+							$filter = (isset($key) ? 'array(\''.$key.'\' => ' : '').'array('.implode(', ', $fs).')'.(isset($key) ? ')' : '');
+							$f = '\''.$field.'\' => '.$filter;
 							
-						unset($key);
-					}
-					elseif(is_string($filters))
-					{
-						$f = '\''.$field.'\' => \''.$filters.'\'';
-					}
-					if($r !== NULL)
-					{
-						$filters_code .= "		".$f.",\n";
+							unset($key);
+						}
+						elseif(is_string($filters))
+						{
+							$f = '\''.$field.'\' => \''.$filters.'\'';
+						}
+						if($r !== NULL)
+						{
+							$filters_code .= "		".$f.",\n";
+						}
 					}
 				}
 			}
-			
 			if($rules_code !== NULL || $filters_code !== NULL)
 			{
 				// Write php file
 				file_put_contents(
 					$dest_file,
-					sprintf( 
-						$validation_class_tpl,
+					'<?php'.sprintf(
+						substr(file_get_contents(MODPATH.'doctrine/templates/classes/validation'.EXT), 5, -1),		// validation class template
 						$class,
 						trim($rules_code),
 						trim($json_rules_code),
 						trim($filters_code)
 						));
-			
+
 				if($input->getOption('extends-entities') !== NULL)
 				{
 					$entity_path = CACHEPATH.'classes/'.$path.'.php';
