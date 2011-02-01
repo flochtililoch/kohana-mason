@@ -7,5 +7,6 @@
 		<key name="id">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
 		<key name="name">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
 		<key name="multiple">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
+		<key name="locales">self::$_locales</key>
 	</process>
 </comp>
