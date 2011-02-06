@@ -135,7 +135,7 @@ return array
 		),
 
 		
-	// APPLICATION MYSHITY
+	// APPLICATION ADIMN
 	// ****** DEVELOPMENT ******
 	'dev.admin.fr' => array(
 		'appname'	=> 'admin',
@@ -145,6 +145,19 @@ return array
 		'cdn'		=> array(
 			'//dev.admin.fr/assets/'
 			)	
+		),
+		
+	// APPLICATION ADIMN
+	// ****** DEVELOPMENT ******
+	'test.admin.fr' => array(
+		'appname'	=> 'admin',
+		'locale'	=> 'fr_FR',
+		'channel'	=> 1,
+		'env'		=> Kohana::TESTING,
+		'cdn'		=> array(
+			'//test.admin.fr/assets/'
+			)	
 		)
+
 	
 );
