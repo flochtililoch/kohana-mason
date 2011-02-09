@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
-use Doctrine\DBAL\Logging\SqlLogger;
+use Doctrine\DBAL\Logging\SQLLogger;
 
 /**
  * Doctrine ORM SQL Logger.
