@@ -14,7 +14,7 @@ Entities\User:
       filters: trim
       rules:
         email: true
-        min_length: 6
+        not_empty: true
         max_length: 60
     password:
       type: string
@@ -24,11 +24,6 @@ Entities\User:
         min_length: 6
         max_length: 60
         regex: /^.*(?=.*[a-z])(?=.*[A-Z]).*$/    # http://www.zorched.net/2009/05/08/password-strength-validation-with-regular-expressions/
-    locale:
-      type: string
-      length: 5
-      rules:
-        i18n::valid_locale
   oneToMany:
     token:
       targetEntity: Entities\Token
