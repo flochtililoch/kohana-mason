@@ -421,30 +421,21 @@ class Kohana extends Kohana_Core
 	 */
 	public static function auto_load($class)
 	{
-		// Lower case class name
-		$class = strtolower($class);
-		
 		// Transform the class name into a path
 		$file = strtr($class, array('\\' => '/', '_' => '/'));
 
-		// If class exists in the filesystem
-		if ($path = Kohana::find_file('classes', $file.@self::$tree['cache_ids'][$class]))
-		{
-			// Load the class file
-			require $path;
+		// Non-Kohana classes that don't respect lower case convention
+		if(($path = Kohana::find_file('classes', $file))
 			
-			// Class has been found
-			return TRUE;
-		}
-		// Else if class to load is a controller that has not been cached yet
-		elseif (preg_match('/^controller\/(\w+?)\/(.*\/)*?(\w*)$/i', $file, $component) && $path = Component::compile($component))
-		{
-	        require $path;
-			
-			// Class has been found
-			return TRUE;
-		}
+		 // OR Kohana classes & already compiled components 
+		 || ($path = Kohana::find_file('classes', strtolower($file).@self::$tree['cache_ids'][$class]))
+		
+		 // OR components that haven't been compiled yet
+		 || (preg_match('/^controller\/(\w+?)\/(.*\/)*?(\w*)$/i', strtolower($file), $component) && $path = Component::compile($component))	)
 
+			// Load the class file
+			return require $path;
+		
 		// Class is not in the filesystem
 		return FALSE;
 	}
