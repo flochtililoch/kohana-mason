@@ -8,7 +8,7 @@ use Doctrine\DBAL\Logging\SqlLogger;
  * @package    Component
  * @author     Florent Bonomo
  */
-class Doctrine_Profiler implements SqlLogger
+class Doctrine_Profiler implements SQLLogger
 {
 	public static $log;
 	
