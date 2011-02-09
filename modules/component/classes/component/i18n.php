@@ -395,6 +395,18 @@ class Component_I18n
 	 */
 	public static function valid_locale($locale, $strict = TRUE)
 	{
+		if(is_array($locale))
+		{
+			foreach($locale as $locale_code)
+			{
+				$locale_valid = self::valid_locale($locale_code);
+				if($locale_valid !== TRUE)
+				{
+					return FALSE;
+				}
+			}
+			return TRUE;
+		}
 		// If locale string is well formed
         if(preg_match(I18n::$locale_valid_pattern, $locale, $matches))
         {

@@ -36,17 +36,19 @@ class Component_Validate extends Kohana_Validate
 			}
 		}
 
+		$data = $this->as_array();
+
 		if($this->check())
 		{
-			foreach($this->as_array() as $p => $v)
+			foreach($data as $p => $v)
 			{
 				if(array_key_exists($p, $rules))
 				{
 					if(is_array($rules[$p]) && in_array('date', $rules[$p]) || $rules[$p] === 'date')
 					{
-						$date_format = array_key_exists($p.'_datetype', $this) ? $this[$p.'_datetype'] : I18n::DATE_TYPE;
-						$time_format = array_key_exists($p.'_timetype', $this) ? $this[$p.'_timetype'] : I18n::TIME_TYPE;
-						unset($this[$p.'_datetype'], $this[$p.'_timetype']);
+						$date_format = array_key_exists($p.'_datetype', $data) ? $data[$p.'_datetype'] : I18n::DATE_TYPE;
+						$time_format = array_key_exists($p.'_timetype', $data) ? $data[$p.'_timetype'] : I18n::TIME_TYPE;
+						unset($data[$p.'_datetype'], $data[$p.'_timetype']);
 						$v = I18n::datetime($v, $date_format, $time_format)->datetime;
 					}
 				}
@@ -61,7 +63,7 @@ class Component_Validate extends Kohana_Validate
 		{
 			return array(
 				'errors' => $this->errors('validate'),
-				'data' => $this->as_array()
+				'data' => $data
 				);
 		}
 	}

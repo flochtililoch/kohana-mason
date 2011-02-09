@@ -21,9 +21,16 @@ class Validation_%1$s
 	public function update($data)
 	{
 		$dv = Validate::factory($data);
-	
+
 		$entity = $this;
-		$callback = function ($field, $value) use (&$entity){ $entity->{'set'.Ucfirst($field)}($value); };
+		$callback = function ($field, $value) use (&$entity)
+		{
+			$m = 'set'.Ucfirst($field);
+			if(method_exists($entity, $m))
+			{
+				$entity->{$m}($value);
+			}
+		};
 		return $dv->process($this->rules, $this->filters, $callback);
 	}
 
