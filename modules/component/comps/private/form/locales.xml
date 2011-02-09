@@ -2,11 +2,20 @@
 	<attr>
 		<key name="_locales" visibility="protected static" process="true">ORM::load('Locale')->findAll()</key>
 	</attr>
+	<php>
+		<![CDATA[
+			$id = array_shift($this->request->args);
+			$name = array_shift($this->request->args);
+			$default_locale = array_shift($this->request->args);
+			$default_locale = $default_locale ? $default_locale : Kohana::$locale;
+			$multiple = array_shift($this->request->args);
+		]]>
+	</php>
 	<process>
-		<key name="default_locale">Kohana::$locale</key>
-		<key name="id">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
-		<key name="name">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
-		<key name="multiple">is_array($this->request->args) ? array_shift($this->request->args) : NULL</key>
+		<key name="id">$id</key>
+		<key name="name">$name</key>
+		<key name="default_locale">$default_locale</key>
+		<key name="multiple">$multiple</key>
 		<key name="locales">self::$_locales</key>
 	</process>
 </comp>

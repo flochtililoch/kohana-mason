@@ -2,6 +2,7 @@
 	<php>
 		<![CDATA[
 			$timestamp = array_shift($this->request->args);
+			$id = array_shift($this->request->args);
 			$name = array_shift($this->request->args);
 			$datetype = ($arg = array_shift($this->request->args)) ? $arg : 'medium';
 			$timetype = ($arg = array_shift($this->request->args)) ? $arg : 'short';
@@ -9,6 +10,7 @@
 		]]>
 	</php>
 	<process>
+		<key name="id">$id</key>
 		<key name="name">$name</key>
 		<key name="datetime">$datetime</key>
 		<key name="datetype">$datetype</key>
