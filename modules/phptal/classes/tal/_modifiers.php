@@ -55,8 +55,8 @@ function phptal_tales_orm($path, $nothrow)
 function phptal_tales_static($paths, $nothrow)
 {
 	// Convert path to array
-	$paths = explode(';', trim($paths));
-	
+	$paths = explode(',', trim($paths));
+
 	// First string in path is class name/method_name
 	$static = explode('/', array_shift($paths));
 	$class = $static[0];
