@@ -111,3 +111,13 @@ function phptal_tales_dump($src, $nothrow)
 {
 	return 'Kohana::debug('.phptal_tales($src, $nothrow).')';
 }
+
+/**
+ * Dump an object from within the context using Kohana::debug method
+ */
+function phptal_tales_in_array($src, $nothrow)
+{
+	// Convert path to array
+	$paths = explode(',', trim($src));
+	return 'in_array('.phptal_tales($paths[0], $nothrow).', '.phptal_tales($paths[1], $nothrow).')';
+}
