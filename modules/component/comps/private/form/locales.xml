@@ -6,15 +6,15 @@
 		<![CDATA[
 			$id = array_shift($this->request->args);
 			$name = array_shift($this->request->args);
-			$default_locale = array_shift($this->request->args);
-			$default_locale = $default_locale ? $default_locale : Kohana::$locale;
+			$selected = array_shift($this->request->args);
+			$selected = $selected ? $selected : Kohana::$locale;
 			$multiple = array_shift($this->request->args);
 		]]>
 	</php>
 	<process>
 		<key name="id">$id</key>
 		<key name="name">$name</key>
-		<key name="default_locale">$default_locale</key>
+		<key name="selected">(array) $selected</key>
 		<key name="multiple">$multiple</key>
 		<key name="locales">self::$_locales</key>
 	</process>
