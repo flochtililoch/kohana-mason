@@ -1,0 +1,21 @@
+<comp>
+	<attr>
+		<key name="_timezones" visibility="protected static" process="true">ORM::load('Timezone')->findAll()</key>
+	</attr>
+	<php>
+		<![CDATA[
+			$id = array_shift($this->request->args);
+			$name = array_shift($this->request->args);
+			$selected = array_shift($this->request->args);
+			$selected = $selected ? $selected : date_default_timezone_get();
+			$multiple = array_shift($this->request->args);
+		]]>
+	</php>
+	<process>
+		<key name="id">$id</key>
+		<key name="name">$name</key>
+		<key name="selected">(array) $selected</key>
+		<key name="multiple">$multiple</key>
+		<key name="timezones">self::$_timezones</key>
+	</process>
+</comp>

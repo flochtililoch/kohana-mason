@@ -1,0 +1,3 @@
+<select tal:attributes="id id | nothing; name name | nothing; multiple php:(multiple EQ 'multiple') ? 'multiple' : NULL" name="timezones[]" id="timezones">
+	<option tal:repeat="timezone timezones" tal:content="timezone/getTimezone" tal:attributes="value timezone/getTimezone; selected in_array: timezone/getTimezone, selected;"/>
+</select>
