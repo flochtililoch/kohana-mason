@@ -5,15 +5,15 @@ defined('SYSPATH') OR die('No direct access allowed.');
 class %2$s extends %3$s
 {
 
-	// <attr/> section
+	// <attr>
 	%4$s
-	// --------------
+	// </attr>
 	
 	public function before()
 	{
-		// <attr process="true"/> section
+		// <attr process="true">
 		%5$s
-		// -------------
+		// </attr>
 		parent::before();
 	}
 	
@@ -27,13 +27,13 @@ class %2$s extends %3$s
 		// parent comp is run before its child
 		parent::action_index();
 		
-		// <php/> section
+		// <php>
 		%6$s
-		// -------------
+		// </php>
 	
-		// <process/> section
+		// <process>
 		%7$s
-		// -----------------
+		// </process>
 		
 		// Store current comp name in base component wrapping_chain method
 		$base_comp = $this->base_comp();
@@ -90,5 +90,9 @@ class %2$s extends %3$s
 	{
 		return get_class();
 	}
+	
+	// <methods>
+	%8$s
+	// </methods>
 
 } // End %2$s
