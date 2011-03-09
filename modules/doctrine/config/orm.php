@@ -5,6 +5,10 @@ return array
 	// Cache driver
 	'cache_driver' => 'ApcCache',
 	
+	// Encoding & Collation
+	'encoding' => 'utf8',
+	'collation' => 'utf8_general_ci',
+	
 	// DB connection settings
 	'connection_options' => array(
 		Kohana::DEVELOPMENT => array(
