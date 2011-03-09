@@ -219,7 +219,7 @@ class Kohana extends Kohana_Core
         date_default_timezone_set($settings['timezone']);
 		
 		// Enable or disable internal caching
-		Kohana::$caching = (bool) $settings['caching'];
+		Kohana::$caching = (bool) $settings['caching'][Kohana::$environment];
 		
 		// Set the default cache lifetime
 		Kohana::$cache_life = (int) $settings['cache_life'];
@@ -243,9 +243,9 @@ class Kohana extends Kohana_Core
 		}
 
 		// Set profiling
-		if (isset($settings['profile']))
+		if (isset($settings['profile'][Kohana::$environment]))
 		{
-			Kohana::$profiling = (bool) $settings['profile'];
+			Kohana::$profiling = (bool) $settings['profile'][Kohana::$environment];
 		}
 		
 		// Start a new benchmark
@@ -292,7 +292,7 @@ class Kohana extends Kohana_Core
 		}
 
 		// Set error handling
-		Kohana::$errors = (bool) $settings['errors'];
+		Kohana::$errors = (bool) $settings['errors'][Kohana::$environment];
 		if(Kohana::$errors === TRUE)
 		{
 			// Enable Kohana exception handling, adds stack traces and error source.
@@ -342,7 +342,7 @@ class Kohana extends Kohana_Core
 		Kohana::$log = Kohana_Log::instance();
 		
 		// Attach the file write to logging. Multiple writers are supported
-		if(isset($settings['logging']) && $settings['logging'] === TRUE)
+		if(isset($settings['logging'][Kohana::$environment]) && $settings['logging'][Kohana::$environment] === TRUE)
 		{
 			Kohana::$logging = TRUE;
 			Kohana::$log->attach(new Kohana_Log_File(LOGPATH . 'kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
@@ -683,5 +683,40 @@ class Kohana extends Kohana_Core
 		// Kohana default shutdown
 		parent::shutdown_handler();
 	}
+	
+	/**
+	 * Check if a given environment is valid / Return valid environments list
+	 *
+	 * @param	mixed		envirnoment name to check; if FALSE, will return an array containing all valid environments
+	 * @return  mixed		environment is valid bool / list of valid envs.
+	 * @access	public
+	 * @static
+	 */
+	public static function valid_environment($environment = FALSE)
+	{
+		$valid_environments = array(
+			Kohana::DEVELOPMENT => 'dev',
+			Kohana::TESTING => 'test',
+			Kohana::STAGING => 'stag',
+			Kohana::PRODUCTION => 'www'
+			);
+		
+		if($environment === FALSE)
+		{
+			return $valid_environments;
+		}
+		else
+		{
+			$environment = (array) $environment;
+			foreach($environment as $env)
+			{
+				if(!in_array($env, $valid_environments))
+				{
+					return FALSE;
+				}
+			}
+			return $environment;
+		}
+	}	
 
 }	// End Kohana
