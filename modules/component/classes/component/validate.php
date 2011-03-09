@@ -8,30 +8,54 @@
  */
 class Component_Validate extends Kohana_Validate
 {
-	public function process($rules = array(), $filters = array(), $callback_field_valid = NULL)
+	public static function form(&$_POST, $validation = array())
 	{
+		// All fields default to NULL
+		$allowed_fields = array_key_exists('fields', $validation) ? array_map(function($n){ return null; }, array_flip($validation['fields'])) : array();
+		
+		// If there's a defined list of fields, filter them to only allowed ones
+		if(count($allowed_fields))
+		{
+			// Keep data from allowed fields only
+			$_POST = array_intersect_key(
+								array_merge(
+									$allowed_fields,
+									$_POST
+									),
+								$allowed_fields
+								);
+		}
+
+		// Validate data
+		$valid = Validate::factory($_POST);
+		$result = $valid->process($validation);
+		
+		// Save modified data
+		$_POST = $valid->as_array();
+		
+		// Return validation result
+		return $result;
+	}
+	
+	public function process($validation, $callback_field_valid = NULL)
+	{
+		$types = array('rules', 'filters', 'callbacks');
+		
 		foreach($this as $field => $value)
 		{
-			if(isset($filters) && array_key_exists($field, $filters))
+			foreach($types as $type)
 			{
-				if(is_array($filters[$field]))
+				$validation[$type] = array_key_exists($type, $validation) ? $validation[$type] : array();
+				if(isset($validation[$type]) && array_key_exists($field, $validation[$type]))
 				{
-					$this->filters($field, $filters[$field]);
-				}
-				else
-				{
-					$this->filter($field, $filters[$field]);
-				}
-			}
-			if(isset($rules) && array_key_exists($field, $rules))
-			{
-				if(is_array($rules[$field]))
-				{
-					$this->rules($field, $rules[$field]);
-				}
-				else
-				{
-					$this->rule($field, $rules[$field]);
+					if(is_array($validation[$type][$field]))
+					{
+						$this->{$type}($field, $validation[$type][$field]);
+					}
+					else
+					{
+						$this->{substr($type, 0, -1)}($field, $validation[$type][$field]);
+					}
 				}
 			}
 		}
@@ -42,9 +66,9 @@ class Component_Validate extends Kohana_Validate
 		{
 			foreach($data as $p => $v)
 			{
-				if(array_key_exists($p, $rules))
+				if(array_key_exists($p, $validation['rules']))
 				{
-					if(is_array($rules[$p]) && in_array('date', $rules[$p]) || $rules[$p] === 'date')
+					if(is_array($validation['rules'][$p]) && in_array('date', $validation['rules'][$p]) || $validation['rules'][$p] === 'date')
 					{
 						$date_format = array_key_exists($p.'_datetype', $data) ? $data[$p.'_datetype'] : I18n::DATE_TYPE;
 						$time_format = array_key_exists($p.'_timetype', $data) ? $data[$p.'_timetype'] : I18n::TIME_TYPE;

@@ -294,6 +294,48 @@ class Component_Core
 					}
 			}
 		}
+		
+		$reserved_methods_names = array( 'before', 'action_index', 'get', 'context', 'instance', 'base_comp');
+		$methods_code = array();
+		foreach($xml->methods as $methods)
+		{
+			foreach($methods->method as $method)
+			{
+				// Retrieve all XML tags within <attr/>
+				$tag_attributes = array();
+				foreach($method->attributes() as $name => $value)
+				{
+					$tag_attributes[$name] = $value->__toString();
+				}
+				// If the current tag contains a 'name' attribute
+				if(array_key_exists('name', $tag_attributes))
+				{
+					$name = $tag_attributes['name'];
+					if(in_array($name, $reserved_methods_names))
+					{
+						throw new Kohana_Exception('Method name :name reserved (reserved names = '.implode(', ', $reserved_methods_names).'). Pick another one.',
+							array(':name' => $name));
+					}
+					else
+					{
+						// if visibility attribute is set
+						$visibility = 'private';
+						if(array_key_exists('visibility', $tag_attributes))
+						{
+							$visibility = $tag_attributes['visibility'];
+						}
+						
+						// if args attribute is set
+						$args = '';
+						if(array_key_exists('args', $tag_attributes) && $tag_attributes['args'] !== NULL)
+						{
+							$args = '$'.implode(', $', explode(',', $tag_attributes['args']));
+						}
+						$methods_code[] = $visibility.' function '.$name.'('.$args.')'.chr(13).chr(9).'{'.chr(13).chr(9).chr(9).trim($method->__toString()).chr(13).chr(9).'}';
+					}
+				}
+			}
+		}
 
 		// Write php file
 		file_put_contents(
@@ -306,7 +348,8 @@ class Component_Core
 				implode($attributes, chr(13).chr(9)),												// attributes
 				implode($attributes_process, chr(13).chr(9)),										// attributes
 				trim($xml->php),																	// php code
-				implode($process, chr(13).chr(9).chr(9))					                        // view variables
+				implode($process, chr(13).chr(9).chr(9)),					                        // view variables
+				implode($methods_code, chr(13).chr(9))					                        // controller methods
 				));
 
 		// Return compiled comp path

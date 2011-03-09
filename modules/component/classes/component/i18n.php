@@ -31,6 +31,11 @@ class Component_I18n
 	public static $source = 'en-us';
 	
 	/**
+	 * @var  array	locales static cache
+	 */
+	public static $locales = array();
+	
+	/**
 	 * NOTICE : defined for compatibility with default Kohana translation service
 	 *
 	 * @static
@@ -223,6 +228,10 @@ class Component_I18n
 		return I18n::instance()->translate($string);
 	}
 	
+	public static function locales()
+	{
+	}
+	
 	/**
      * Gettext translator constructor
 	 *
@@ -389,6 +398,7 @@ class Component_I18n
      * Check wether a string is a valid locale
      * @param	string 		string representing the locale
 	 * @param	boolean		enforce check by looking up value in database
+	 * @return  boolean
 	 *
 	 * @access	public
 	 * @static
@@ -399,7 +409,7 @@ class Component_I18n
 		{
 			foreach($locale as $locale_code)
 			{
-				$locale_valid = self::valid_locale($locale_code);
+				$locale_valid = I18n::valid_locale($locale_code);
 				if($locale_valid !== TRUE)
 				{
 					return FALSE;
@@ -413,7 +423,13 @@ class Component_I18n
 			// If we need to check if the locale exists in the database
 			if($strict === TRUE)
 			{
-				if(count(ORM::load('Locale')->findBy(array('language' => $matches[1], 'country' => $matches[2]))))
+				if(!array_key_exists($locale, I18n::$locales))
+				{
+					$_locale = ORM::load('Locale')->findBy(array('language' => $matches[1], 'country' => $matches[2]));
+					I18n::$locales[$locale] = $_locale[0];
+				}
+				
+				if(count(I18n::$locales[$locale]))
 				{
 					return TRUE;
 				}
@@ -422,6 +438,22 @@ class Component_I18n
 			return TRUE;
 		}
 		return FALSE;
+	}
+	
+	/**
+     * Check wether a string is a valid timezone
+     * @param	string 		string representing the timezone
+	 * @return  boolean
+	 *
+	 * @access	public
+	 * @static
+	 */
+	public static function valid_timezone($timezone)
+	{
+		$current_tz = date_default_timezone_get();
+		$valid = date_default_timezone_set($timezone);
+		date_default_timezone_set($current_tz);
+		return $valid;
 	}
 	
 	/**
