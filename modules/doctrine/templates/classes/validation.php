@@ -31,7 +31,10 @@ class Validation_%1$s
 				$entity->{$m}($value);
 			}
 		};
-		return $dv->process($this->rules, $this->filters, $callback);
+		return $dv->process(
+			array('rules' => $this->rules, 'filters' => $this->filters, 'callbacks' => array(),
+			$callback
+			);
 	}
 
 } // End %1$s
