@@ -119,5 +119,10 @@ function phptal_tales_in_array($src, $nothrow)
 {
 	// Convert path to array
 	$paths = explode(',', trim($src));
-	return 'in_array('.phptal_tales($paths[0], $nothrow).', '.phptal_tales($paths[1], $nothrow).')';
+	return 'is_array('.phptal_tales($paths[1], $nothrow).') && in_array('.phptal_tales($paths[0], $nothrow).', '.phptal_tales($paths[1], $nothrow).')';
+}
+
+function phptal_tales_null($src, $nothrow)
+{
+	return phptal_tales($src, $nothrow).' === NULL';
 }
