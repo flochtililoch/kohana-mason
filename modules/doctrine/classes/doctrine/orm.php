@@ -1,7 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 use Doctrine\ORM\Configuration,
-    Doctrine\ORM\EntityManager;
+    Doctrine\ORM\EntityManager,
+	Doctrine\DBAL\Event\Listeners\MysqlSessionInit;
 
 /**
  * Doctrine ORM EntityManager Class Extension
@@ -51,9 +52,16 @@ class Doctrine_Orm extends EntityManager
 		{
 			$config->setSqlLogger(new Doctrine_Profiler);
 		}
-
+		
 		// Create EntityManager
-		return Orm::create($db_config->connection_options[Kohana::$environment], $config);
+		$em = Orm::create($db_config->connection_options[Kohana::$environment], $config);
+		
+		// Set character encoding
+		$em->getEventManager()->addEventSubscriber(
+			new MysqlSessionInit($db_config->encoding, $db_config->collation)
+			);
+		
+		return $em;
 	}
 	
 	/**
