@@ -164,16 +164,12 @@ class Kohana extends Kohana_Core
 		// Access from browser
 		if(!Kohana::$is_cli)
 		{
-			// load domain config
-			$sites = Kohana::load(APPSPATH.'sites.php');
-			$application = $sites[$_SERVER['SERVER_NAME']];
-			
 			// define application name, environment, locale, channel & CDNs
-			define('APPNAME', $application['appname']);
-			Kohana::$environment = $application['env'];
-			Kohana::$locale = $application['locale'];
-			Kohana::$channel = $application['channel'];
-			Kohana::$cdn =  $application['cdn'];
+			define('APPNAME', apache_getenv('appname'));
+			Kohana::$environment = apache_getenv('env');
+			Kohana::$locale = apache_getenv('locale');
+			Kohana::$channel =apache_getenv('channel');
+			Kohana::$cdn =  explode(';', apache_getenv('cdn'));
 		}
 		// Access from CLI
 		else
