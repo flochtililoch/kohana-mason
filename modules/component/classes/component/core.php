@@ -40,13 +40,6 @@ class Component_Core
 	 * @access	protected
 	 * @static
 	 */
-	protected static $_locales = array();
-	
-	/**
-	 * Locales to process when building the tree
-	 * @access	protected
-	 * @static
-	 */
 	protected static $_internal_trees = array();
 	
 	/**
@@ -69,24 +62,6 @@ class Component_Core
 		if($appname !== NULL)
 		{
 			Component::set_app($appname);
-		}
-		else
-		{
-			$appname = APPNAME;
-		}
-		
-		// Init locales container
-		Component::$_locales = array();
-		
-		// Loop through all existing sites
-		foreach(Kohana::load(APPSPATH.'sites.php') as $application)
-		{
-			// If pointed site runs within current app
-			if($application['appname'] === $appname)
-			{
-				// Save its locale
-				Component::$_locales[$application['locale']][] = $application['channel'];
-			}
 		}
 		
 		// Load internal and external trees paths
