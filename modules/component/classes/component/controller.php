@@ -54,7 +54,7 @@ class Component_Controller extends Kohana_Controller
 			// Merge component's assets with main request current assets
 			if(!in_array($comp::$_assets_cache_key, $comp::$_assets_pushed))
 			{
-				Request::$instance->assets = array_replace_recursive(Request::$instance->assets, $assets);
+				Request::$initial->assets = array_replace_recursive(Request::$initial->assets, $assets);
 				
 				// Flag assets as pushed in the stack
 				$comp::$_assets_pushed[] = $comp::$_assets_cache_key;
@@ -72,14 +72,18 @@ class Component_Controller extends Kohana_Controller
 				// Find which class to use to load the view
 				$view_engine = $comp::$_view_engine ? $comp::$_view_engine : Kohana::config('view.engine');
 				
-				// Build view object
-				$this->request->response = new $view_engine(
+				// Create response object and set its body with the view content
+				$response = new Response();
+				$response->body(new $view_engine(
 					$path.'/views/'.$views['name'],
 					$comp,
 					$views['cache_id']
-					);
-		
-				// Return view result
+					));
+
+				// Assign the response to the request
+				$this->request->response($response);
+
+				// Then return the request
     			return $this->request;
 			}
     		else

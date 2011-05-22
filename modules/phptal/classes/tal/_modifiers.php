@@ -32,7 +32,7 @@ function phptal_tales_comp($paths, $nothrow)
 		$params = '';
 	}
 
-	return 'phptal_tostring(Request::factory(\''.$comp.'\',$ctx->controller'.$params.')->execute()->response)';
+	return 'phptal_tostring(Request::factory(\''.$comp.'\', NULL, array(), $ctx->controller'.$params.')->execute())';
 }
 
 /**
@@ -109,7 +109,7 @@ function phptal_tales_base_uri($src, $nothrow)
  */
 function phptal_tales_dump($src, $nothrow)
 {
-	return 'Kohana::debug('.phptal_tales($src, $nothrow).')';
+	return 'Debug::dump('.phptal_tales($src, $nothrow).')';
 }
 
 /**

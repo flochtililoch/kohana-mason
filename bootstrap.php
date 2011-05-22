@@ -19,7 +19,6 @@ define('APPSPATH', realpath(DOCROOT.'applications').DIRECTORY_SEPARATOR);
 define('SCPPATH', realpath(DOCROOT.'scripts').DIRECTORY_SEPARATOR);
 
 // Load the base / Kohana core class / Kohana core extension class
-require SYSPATH.'base'.EXT;
 require SYSPATH.'classes/kohana/core'.EXT;
 require MODPATH.'kohana'.EXT;
 

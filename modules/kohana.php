@@ -166,7 +166,7 @@ class Kohana extends Kohana_Core
 		{
 			// define application name, environment, locale, channel & CDNs
 			define('APPNAME', apache_getenv('appname'));
-			Kohana::$environment = apache_getenv('env');
+			Kohana::$environment = constant('Kohana::'.strtoupper(apache_getenv('env')));
 			Kohana::$locale = apache_getenv('locale');
 			Kohana::$channel =apache_getenv('channel');
 			Kohana::$cdn =  explode(';', apache_getenv('cdn'));
@@ -281,18 +281,12 @@ class Kohana extends Kohana_Core
 		// Start an output buffer
 		ob_start();
 
-		// E_DEPRECATED only exists in PHP >= 5.3.0
-		if(defined('E_DEPRECATED'))
-		{
-			Kohana::$php_errors[E_DEPRECATED] = 'Deprecated';
-		}
-
 		// Set error handling
 		Kohana::$errors = (bool) $settings['errors'][Kohana::$environment];
 		if(Kohana::$errors === TRUE)
 		{
 			// Enable Kohana exception handling, adds stack traces and error source.
-			set_exception_handler(array('Kohana', 'exception_handler'));
+			set_exception_handler(array('Kohana_Exception', 'handler'));
 
 			// Enable Kohana error handling, converts all PHP errors to exceptions.
 			set_error_handler(array('Kohana', 'error_handler'));
@@ -336,12 +330,12 @@ class Kohana extends Kohana_Core
 
 		// Load the logger
 		Kohana::$log = Kohana_Log::instance();
-		
+
 		// Attach the file write to logging. Multiple writers are supported
 		if(isset($settings['logging'][Kohana::$environment]) && $settings['logging'][Kohana::$environment] === TRUE)
 		{
 			Kohana::$logging = TRUE;
-			Kohana::$log->attach(new Kohana_Log_File(LOGPATH . 'kohana'), array(Kohana::ERROR, Kohana::DEBUG, Kohana::INFO));
+			Kohana::$log->attach(new Log_File(LOGPATH . 'kohana'));
 		}
 
 		// Init Locale and Channel
@@ -376,10 +370,10 @@ class Kohana extends Kohana_Core
 		// If no source is specified, the URI will be automatically detected.
         if(Kohana::$is_cli === FALSE)
 		{
-			$request = Request::instance();
-			
+			$request = Request::factory();
+
 			// Process the whole request
-			$response = (string) $request->execute();
+			$response = (string) $request->execute()->body();
 
 			// If there is still unused params, URI is wrong -> 404
 			if(strlen($request->shift_param()))
@@ -389,7 +383,7 @@ class Kohana extends Kohana_Core
 
 			// Send correct header
 			$request->send_headers();
-			
+
 			// Display rendered page
 			echo $response;
 
@@ -535,12 +529,12 @@ class Kohana extends Kohana_Core
 	 */
 	public static function assets($type)
 	{
-		$assets_key = 'assets_'.$type.'_'.sha1(serialize(Request::$instance->assets));
+		$assets_key = 'assets_'.$type.'_'.sha1(serialize(Request::$initial->assets));
 
 		if(! (Kohana::$caching === TRUE && $assets = Kohana::cache($assets_key)) )
 		{
 			// Development and Staging environments loads unpacked assets
-			$files = array($type => Request::$instance->assets[$type]);
+			$files = array($type => Request::$initial->assets[$type]);
 			
 			// Testing and Production environments loads packed assets
 			if(!in_array(Kohana::$environment, array(Kohana::DEVELOPMENT, KOHANA::STAGING) ) )
