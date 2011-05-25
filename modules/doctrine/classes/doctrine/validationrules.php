@@ -60,7 +60,7 @@ equalTo( other )	Returns: Boolean					Requires the element to be the same as ano
 
  * @author  Florent Bonomo
  */
-class Doctrine_Validation extends Console\Command\Command
+class Doctrine_ValidationRules extends Console\Command\Command
 {
 	
 	private $_model_path = 'model/yaml';

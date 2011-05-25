@@ -45,7 +45,7 @@ $cli->addCommands(array(
     new \Doctrine\ORM\Tools\Console\Command\RunDqlCommand(),
 
 	// Custom Commands
-	new Validation()
+	new ValidationRules()
 
 ));
 $cli->run();

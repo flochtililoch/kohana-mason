@@ -32,7 +32,7 @@ class Validation_%1$s
 			}
 		};
 		return $dv->process(
-			array('rules' => $this->rules, 'filters' => $this->filters, 'callbacks' => array(),
+			array('rules' => $this->rules, 'filters' => $this->filters, 'callbacks' => array()),
 			$callback
 			);
 	}

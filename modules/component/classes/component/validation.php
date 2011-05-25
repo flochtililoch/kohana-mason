@@ -6,7 +6,7 @@
  * @package    Component
  * @author     Florent Bonomo
  */
-class Component_Validate extends Kohana_Validate
+class Component_Validation extends Kohana_Validation
 {
 	public static function form(&$_POST, $validation = array())
 	{
@@ -27,7 +27,8 @@ class Component_Validate extends Kohana_Validate
 		}
 
 		// Validate data
-		$valid = Validate::factory($_POST);
+		$valid = Validation::factory($_POST);
+
 		$result = $valid->process($validation);
 		
 		// Save modified data
@@ -39,23 +40,18 @@ class Component_Validate extends Kohana_Validate
 	
 	public function process($validation, $callback_field_valid = NULL)
 	{
-		$types = array('rules', 'filters', 'callbacks');
-		
 		foreach($this as $field => $value)
 		{
-			foreach($types as $type)
+			$validation['rules'] = array_key_exists('rules', $validation) ? $validation['rules'] : array();
+			if(isset($validation['rules']) && array_key_exists($field, $validation['rules']))
 			{
-				$validation[$type] = array_key_exists($type, $validation) ? $validation[$type] : array();
-				if(isset($validation[$type]) && array_key_exists($field, $validation[$type]))
+				if(is_array($validation['rules'][$field]))
 				{
-					if(is_array($validation[$type][$field]))
-					{
-						$this->{$type}($field, $validation[$type][$field]);
-					}
-					else
-					{
-						$this->{substr($type, 0, -1)}($field, $validation[$type][$field]);
-					}
+					$this->rules($field, $validation['rules'][$field]);
+				}
+				else
+				{
+					$this->rule($field, $validation['rules'][$field]);
 				}
 			}
 		}
