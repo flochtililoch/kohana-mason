@@ -8,10 +8,11 @@
 class Kohana extends Kohana_Core
 {	
 	/**
-	 * Debug constant
+	 * Debug constants
 	 */
-	const DEBUG_JSON = 1;
-	const DEBUG_HTML = 2;
+	const DEBUG_JSON = 1;	//	0001
+	const DEBUG_HTML = 2;	//	0010
+	const DEBUG_CACHE = 4;	//	0100
 
 	/**
 	 * Components tree
@@ -373,19 +374,18 @@ class Kohana extends Kohana_Core
 			$request = Request::factory();
 
 			// Process the whole request
-			$response = (string) $request->execute()->body();
+			$response = $request->execute();
 
 			// If there is still unused params, URI is wrong -> 404
 			if(strlen($request->shift_param()))
 			{
-				$request->status = 404;
+				$response->status(404);
 			}
-
 			// Send correct header
-			$request->send_headers();
+			$response->send_headers();
 
 			// Display rendered page
-			echo $response;
+			echo $response->body();
 
 			// Echo profile results
 			if($settings['profile'] === TRUE)
@@ -396,6 +396,7 @@ class Kohana extends Kohana_Core
 			// Save persistent entities
 			Orm::save();
         }
+
 	}
 
 	/**
@@ -658,10 +659,13 @@ class Kohana extends Kohana_Core
 			{
 				$cmd = 'rd "%s" /s /q';
 			}
-			system(sprintf($cmd, CACHEPATH.'classes/controller'));
-			system(sprintf($cmd, CACHEPATH.'i18n'));
-			system(sprintf($cmd, CACHEPATH.'kohana'));
-			system(sprintf($cmd, CACHEPATH.'views'));
+			if(!(Kohana::$debug & Kohana::DEBUG_CACHE))
+			{
+				system(sprintf($cmd, CACHEPATH.'classes/controller'));
+				system(sprintf($cmd, CACHEPATH.'i18n'));
+				system(sprintf($cmd, CACHEPATH.'kohana'));
+				system(sprintf($cmd, CACHEPATH.'views'));
+			}
 			Cache::instance()->delete_all();
 		}
 		else

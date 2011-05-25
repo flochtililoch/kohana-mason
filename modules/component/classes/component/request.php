@@ -58,6 +58,9 @@ class Component_Request extends Kohana_Request
 		// Store arguments
 		$r->args = $args;
 		
+		// Store uri segments
+		$r->_params = array_key_exists('params', $r->_params) ? preg_split('/\//', $r->_params['params']) : $r->_params;
+		
 		// Returns request instance
 		return $r;
 	}

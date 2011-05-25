@@ -10,8 +10,6 @@ use Doctrine\DBAL\Logging\SQLLogger;
  */
 class Doctrine_Profiler implements SQLLogger
 {
-	public static $log;
-	
 	/**
      * Logs a SQL statement somewhere.
      *
@@ -25,20 +23,15 @@ class Doctrine_Profiler implements SQLLogger
         // Config defines log status
 		if (Kohana::$logging === TRUE)
 		{
-			// Create Logger object
-			if(!is_object(self::$log))
-			{
-				self::$log = Kohana_Log::instance();
-				self::$log->attach(new Kohana_Log_File(LOGPATH . 'doctrine', array('PDO')));
-			}
-			
+			Kohana::$log->attach(new Log_File(LOGPATH . 'doctrine'));
+
 			// Add this query to the log
-			self::$log->add('PDO', $sql);
+			Kohana::$log->add(Log::DEBUG, $sql);
 			
 			// And its params if present
 			if ($params)
         	{
-        		Kohana::$log->add('PDO', var_export($params, TRUE));
+        		Kohana::$log->add(Log::DEBUG, var_export($params, TRUE));
         	}
 		}
     }
