@@ -100,7 +100,7 @@ EOT
 			preg_match('/'.preg_quote($validation_path, '/').'\/([A-Za-z0-9-\.]+)\.([A-Za-z0-9-]+)\.dcm\.yml/', $file, $schema_info);
 
 			// Process destination directory
-			if(!is_dir($destPath = CACHEPATH.'classes/validation/'.str_replace('.','/',$schema_info[1])))
+			if(!is_dir($destPath = CACHEPATH.'classes/Validation/'.str_replace('.','/',$schema_info[1])))
 			{
 				mkdir($destPath, 0777, true);
 			}
@@ -123,7 +123,7 @@ EOT
 			$entity = $schema_info[1].'\\'.$schema_info[2];
 			$class = str_replace('.', '_', $filename);
 			$path = str_replace('.', '/', $filename);
-			$dest_file = CACHEPATH.'classes/validation/'.$path.'.php';
+			$dest_file = CACHEPATH.'classes/Validation/'.$path.'.php';
 			
 			/**
 			 * Copy/Paste from yamldriver.php // TODO : FACTORIZE!
